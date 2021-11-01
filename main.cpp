@@ -1,5 +1,5 @@
 #include <iostream>
-#include "geometry/point.hpp"
+#include "geometry/box.hpp"
 
 constexpr Point<int, 3> initialized ()
 {
@@ -13,5 +13,6 @@ constexpr Point<int, 3> initialized ()
 int main ()
 {
     constexpr auto p = initialized();
-    for (auto i : p) std::cout << i << ' ';
+    auto p2 = p;
+    for (auto i : p2) std::cout << i << ' ';
 }
