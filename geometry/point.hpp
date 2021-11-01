@@ -53,9 +53,10 @@ namespace geom
     constexpr bool
     Point<Repr_, Size_>::operator == (const Point& other) const
     {
-        constexpr auto equals = std::equal_to();
         for (size_type i = 0; i < size(); ++i)
-            if (!equals((*this)[i], other[i])) return false;
+            if (!(this->_m_buff[i] == other._m_buff[i]))
+                return false;
+
         return true;
     }
 
@@ -104,7 +105,6 @@ namespace geom
     {
         return this->_m_buff[dim];
     }
-
 }
 
 #endif //EDA_POINT_HPP
