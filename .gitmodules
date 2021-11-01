@@ -1,3 +1,4 @@
 [submodule "nyc-taxi-data"]
 	path = nyc-taxi-data
 	url = https://github.com/toddwschneider/nyc-taxi-data
+	ignore = dirty
