@@ -9,8 +9,8 @@ namespace geom
     struct Box
     {
         using point_type = Point<Repr_, Size_>;
-        using size_type = typename point_type::size_type;
-        using value_type = typename point_type::value_type;
+        using size_type [[maybe_unused]] = typename point_type::size_type;
+        using value_type [[maybe_unused]] = typename point_type::value_type;
 
         /* const so that nobody does something stupid with the ring */
         /* lower point on the box on all dimensions */

@@ -15,8 +15,10 @@ namespace geom
     Point<Repr_, Size_>::operator == (const Point& other) const
     {
         for (size_type i = 0; i < size(); ++i)
-            if (!(this->_m_buff[i] == other._m_buff[i]))
-                return false;
+        {
+            const bool equals = this->_m_buff[i] == other._m_buff[i];
+            if (!equals) return false;
+        }
 
         return true;
     }
