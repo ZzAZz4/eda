@@ -11,9 +11,7 @@ struct Point
     using value_type = Repr_;
     using size_type = std::size_t;
 
-    template<class ... Args>
-    constexpr Point (Args&& ... args)
-        : m_buff{ std::forward<Args&&>(args)... } {}
+    std::array<value_type, Size_> _m_buff{};
 
     [[nodiscard]]
     constexpr static size_type size ();
@@ -31,9 +29,6 @@ struct Point
     constexpr auto end ();
 
     constexpr auto end () const;
-
-private:
-    std::array<value_type, Size_> m_buff{};
 };
 
 template<class Repr_, std::size_t Size_>
@@ -54,40 +49,40 @@ template<class Repr_, std::size_t Size_>
 constexpr auto
 Point<Repr_, Size_>::begin () const
 {
-    return std::begin(this->m_buff);
+    return std::begin(this->_m_buff);
 }
 
 template<class Repr_, std::size_t Size_>
 constexpr auto
 Point<Repr_, Size_>::end () const
 {
-    return std::end(this->m_buff);
+    return std::end(this->_m_buff);
 }
 
 template<class Repr_, std::size_t Size_>
 constexpr auto Point<Repr_, Size_>::begin ()
 {
-    return std::begin(this->m_buff);
+    return std::begin(this->_m_buff);
 }
 
 template<class Repr_, std::size_t Size_>
 constexpr auto Point<Repr_, Size_>::end ()
 {
-    return std::end(this->m_buff);
+    return std::end(this->_m_buff);
 }
 
 template<class Repr_, std::size_t Size_>
 constexpr const typename Point<Repr_, Size_>::value_type&
 Point<Repr_, Size_>::operator [] (Point::size_type dim) const
 {
-    return this->m_buff[dim];
+    return this->_m_buff[dim];
 }
 
 template<class Repr_, std::size_t Size_>
 constexpr typename Point<Repr_, Size_>::value_type&
 Point<Repr_, Size_>::operator [] (Point::size_type dim)
 {
-    return this->m_buff[dim];
+    return this->_m_buff[dim];
 }
 
 
