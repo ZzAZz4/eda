@@ -55,7 +55,7 @@ namespace geom
     }
 
 
-    namespace detail
+    namespace tests
     {
         /* Ensure that a box is equal to its inverses */
         void box_construct_tests ()
