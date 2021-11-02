@@ -3,18 +3,36 @@
 
 #include "point.hpp"
 
-template<class Repr_, std::size_t Size_>
-struct Box
+namespace geom
 {
-    using point_type = Point<Repr_, Size_>;
-    using size_type = typename point_type::size_type;
-    using value_type = typename point_type::value_type;
+    template<class Repr_, std::size_t Size_>
+    struct Box
+    {
+        using point_type = Point<Repr_, Size_>;
+        using size_type [[maybe_unused]] = typename point_type::size_type;
+        using value_type [[maybe_unused]] = typename point_type::value_type;
 
-    point_type _m_lower_bound;
-    point_type _m_upper_bound;
+        /* const so that nobody does something stupid with the ring */
+        /* lower point on the box on all dimensions */
+        const point_type lower;
 
-    constexpr Box (point_type lower, point_type upper)
-        : _m_lower_bound(lower), _m_upper_bound(upper) {}
-};
+        /* upper point on the box on all dimensions */
+        const point_type upper;
+
+        /* Constructor.
+         * Creates a bbox that encloses both lower and upper,
+         * regardless of order on each dimension */
+        constexpr Box (point_type lower_, point_type upper_);
+
+        /* Comparison */
+        constexpr bool operator == (const Box& other) const;
+
+        /* Comparison */
+        constexpr bool operator != (const Box& other) const;
+    };
+}
+
+#include "impl/box.tcc"
+
 
 #endif //EDA_BOX_HPP
