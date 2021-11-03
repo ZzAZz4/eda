@@ -7,9 +7,13 @@ int main ()
     geom::tests::box_intersection_tests();
     geom::tests::box_join_tests();
 
-    geom::Box<int, 3> testbox({1, 2, 3}, {4, 5, 6});
     index::RTree<int, int, 3, 8, 4> tree;
-    tree.insert(testbox, 3);
-    tree.insert(testbox, 4);
+
+    geom::Box<int, 3> testbox1({1, 2, 3}, {4, 5, 6});
+    geom::Box<int, 3> testbox2({2, 3, 4}, {5, 6, 7});
+
+    tree.insert(testbox1, 3);
+    tree.insert(testbox2, 4);
+
     std::cout << "Success";
 }
