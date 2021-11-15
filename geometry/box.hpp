@@ -14,10 +14,10 @@ namespace geom
 
         /* const so that nobody does something stupid with the ring */
         /* lower point on the box on all dimensions */
-        const point_type lower;
+        point_type lower;
 
         /* upper point on the box on all dimensions */
-        const point_type upper;
+        point_type upper;
 
         /* Constructor.
          * Creates a bbox that encloses both lower and upper,
