@@ -35,7 +35,10 @@ namespace index
 
         ~RTree () { delete root; }
 
-        bool insert (const box_type& box, const record_type& record)
+        /* Inserts a box-record pair in the tree
+         * Returns true if successful (it should be successful tho...) */
+        bool
+        insert (const box_type& box, const record_type& record)
         {
             if (!root)
             {
@@ -48,11 +51,39 @@ namespace index
             return false;
         }
 
+        /* Gets all the records contained in the tree given a query box.
+         * Stores the result into the range starting at out.
+         * Returns the end of the new range.
+         * Usage:
+         * >> std::vector<int> results;
+         * >> tree.query({{1, 2, 3}, {4, 5, 6}}, std::back_inserter(results));
+         * >> // Magically, results now contains all the records
+         */
+        template<class OutputIter>
+        OutputIter
+        query (const box_type& box, OutputIter out) const
+        {
+            return query_helper(root, box, out);
+        }
+
+    private:
+        template<class OutputIter>
+        void
+        query_helper (const_node_pointer base, const box_type& box, OutputIter out) const
+        {
+            if (base->_c_is_leaf) {
+                auto node = static_cast<const_leaf_pointer>(base);
+
+            }
+        }
+
+
         auto insert_helper (
             node_pointer base,
             const box_type& box, const record_type& record)
         {
-            if (base->_c_is_leaf) {
+            if (base->_c_is_leaf)
+            {
                 auto node = static_cast<leaf_pointer>(base);
                 auto trial = try_construct_at(node, box, record);
 

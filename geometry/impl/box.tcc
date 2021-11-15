@@ -57,6 +57,7 @@ namespace geom
 
     namespace tests
     {
+#ifdef GEOMETRY_COMPILE_TESTS
         /* Ensure that a box is equal to its inverses */
         void box_construct_tests ()
         {
@@ -76,6 +77,7 @@ namespace geom
             static_assert(box4 == box1, "Test ring-like construction");
         }
     }
+#endif
 }
 
 #endif //EDA_BOX_TCC

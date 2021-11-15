@@ -1,3 +1,4 @@
+#define GEOMETRY_COMPILE_TESTS
 #include "index/rtree.hpp"
 #include <iostream>
 

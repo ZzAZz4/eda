@@ -12,12 +12,11 @@ namespace geom
         using size_type [[maybe_unused]] = typename point_type::size_type;
         using value_type [[maybe_unused]] = typename point_type::value_type;
 
-        /* const so that nobody does something stupid with the ring */
         /* lower point on the box on all dimensions */
-        const point_type lower;
+        point_type lower;
 
         /* upper point on the box on all dimensions */
-        const point_type upper;
+        point_type upper;
 
         /* Constructor.
          * Creates a bbox that encloses both lower and upper,
