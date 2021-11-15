@@ -58,6 +58,7 @@ namespace geom
 
     namespace tests
     {
+#ifdef GEOMETRY_COMPILE_TESTS
         void box_intersection_tests ()
         {
             constexpr Point<int, 3> p1 = { 0, 1, 2 };
@@ -152,6 +153,7 @@ namespace geom
             static_assert(join(b13, b12) == b13, "Join included");
         }
     }
+#endif
 }
 
 #endif //EDA_OPS_HPP
