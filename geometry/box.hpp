@@ -5,10 +5,10 @@
 
 namespace geom
 {
-    template<class Repr_, std::size_t Size_>
+    template<class Point_>
     struct Box
     {
-        using point_type = Point<Repr_, Size_>;
+        using point_type = Point_;
         using size_type [[maybe_unused]] = typename point_type::size_type;
         using value_type [[maybe_unused]] = typename point_type::value_type;
 

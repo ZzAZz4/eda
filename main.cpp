@@ -4,14 +4,13 @@
 
 int main ()
 {
-    geom::tests::box_construct_tests();
-    geom::tests::box_intersection_tests();
-    geom::tests::box_join_tests();
+    using point_type = geom::Point<int, 3>;
+    using box_type = geom::Box<point_type>;
 
-    index::RTree<int, int, 3, 8, 4> tree;
+    index::RTree<int, box_type, 8, 4> tree;
 
-    geom::Box<int, 3> testbox1({1, 2, 3}, {4, 5, 6});
-    geom::Box<int, 3> testbox2({2, 3, 4}, {5, 6, 7});
+    geom::Box<point_type> testbox1({1, 2, 3}, {4, 5, 6});
+    geom::Box<point_type> testbox2({2, 3, 4}, {5, 6, 7});
 
     tree.insert(testbox1, 3);
     tree.insert(testbox2, 4);

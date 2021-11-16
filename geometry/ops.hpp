@@ -6,11 +6,11 @@
 
 namespace geom
 {
-    template<class Repr_, std::size_t Size_>
+    template<class Point_>
     constexpr bool
-    intersects (const Box<Repr_, Size_>& lhs, const Box<Repr_, Size_>& rhs)
+    intersects (const Box<Point_>& lhs, const Box<Point_>& rhs)
     {
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
         {
             const bool gap_exists = lhs.upper[dim] < rhs.lower[dim] ||
                                     rhs.upper[dim] < lhs.lower[dim];
@@ -20,39 +20,39 @@ namespace geom
         return true;
     }
 
-    template<class Repr_, std::size_t Size_>
-    constexpr std::optional<Box<Repr_, Size_>>
-    intersection (const Box<Repr_, Size_>& lhs, const Box<Repr_, Size_>& rhs)
+    template<class Point_>
+    constexpr std::optional<Box<Point_>>
+    intersection (const Box<Point_>& lhs, const Box<Point_>& rhs)
     {
         if (!intersects(lhs, rhs))
             return std::nullopt;
 
-        Point<Repr_, Size_> lower;
-        Point<Repr_, Size_> upper;
+        Point_ lower;
+        Point_ upper;
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
             lower[dim] = std::max(lhs.lower[dim], rhs.lower[dim]);
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
             upper[dim] = std::min(lhs.upper[dim], rhs.upper[dim]);
 
-        return Box<Repr_, Size_>(lower, upper);
+        return Box<Point_>(lower, upper);
     }
 
-    template<class Repr_, std::size_t Size_>
-    constexpr Box<Repr_, Size_>
-    join (const Box<Repr_, Size_>& lhs, const Box<Repr_, Size_>& rhs)
+    template<class Point_>
+    constexpr Box<Point_>
+    join (const Box<Point_>& lhs, const Box<Point_>& rhs)
     {
-        Point<Repr_, Size_> lower;
-        Point<Repr_, Size_> upper;
+        Point_ lower;
+        Point_ upper;
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
             lower[dim] = std::min(lhs.lower[dim], rhs.lower[dim]);
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
             upper[dim] = std::max(lhs.upper[dim], rhs.upper[dim]);
 
-        return Box<Repr_, Size_>(lower, upper);
+        return Box<Point_>(lower, upper);
     }
 
 
@@ -66,17 +66,17 @@ namespace geom
             constexpr Point<int, 3> p3 = { 2, 3, 4 };
             constexpr Point<int, 3> p4 = { 3, 4, 5 };
 
-            constexpr Box<int, 3> b12(p1, p2);
-            constexpr Box<int, 3> b13(p1, p3);
-            constexpr Box<int, 3> b14(p1, p4);
-            constexpr Box<int, 3> b23(p2, p3);
-            constexpr Box<int, 3> b24(p2, p4);
-            constexpr Box<int, 3> b34(p3, p4);
+            constexpr Box b12(p1, p2);
+            constexpr Box b13(p1, p3);
+            constexpr Box b14(p1, p4);
+            constexpr Box b23(p2, p3);
+            constexpr Box b24(p2, p4);
+            constexpr Box b34(p3, p4);
 
-            constexpr Box<int, 3> b11(p1, p1);
-            constexpr Box<int, 3> b22(p2, p2);
-            constexpr Box<int, 3> b33(p3, p3);
-            constexpr Box<int, 3> b44(p4, p4);
+            constexpr Box b11(p1, p1);
+            constexpr Box b22(p2, p2);
+            constexpr Box b33(p3, p3);
+            constexpr Box b44(p4, p4);
 
             static_assert(!intersects(b12, b34), "Test no intersect");
             static_assert(!intersects(b34, b12), "Test no intersect");
@@ -123,17 +123,17 @@ namespace geom
             constexpr Point<int, 3> p3 = { 2, 3, 4 };
             constexpr Point<int, 3> p4 = { 3, 4, 5 };
 
-            constexpr Box<int, 3> b12(p1, p2);
-            constexpr Box<int, 3> b13(p1, p3);
-            constexpr Box<int, 3> b14(p1, p4);
-            constexpr Box<int, 3> b23(p2, p3);
-            constexpr Box<int, 3> b24(p2, p4);
-            constexpr Box<int, 3> b34(p3, p4);
+            constexpr Box b12(p1, p2);
+            constexpr Box b13(p1, p3);
+            constexpr Box b14(p1, p4);
+            constexpr Box b23(p2, p3);
+            constexpr Box b24(p2, p4);
+            constexpr Box b34(p3, p4);
 
-            constexpr Box<int, 3> b11(p1, p1);
-            constexpr Box<int, 3> b22(p2, p2);
-            constexpr Box<int, 3> b33(p3, p3);
-            constexpr Box<int, 3> b44(p4, p4);
+            constexpr Box b11(p1, p1);
+            constexpr Box b22(p2, p2);
+            constexpr Box b33(p3, p3);
+            constexpr Box b44(p4, p4);
 
             static_assert(join(b11, b22) == b12, "Join points");
             static_assert(join(b11, b33) == b13, "Join points");

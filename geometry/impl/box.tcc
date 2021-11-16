@@ -32,42 +32,39 @@ namespace geom {
     }
 }
 namespace geom {
-    template<class Repr_, std::size_t Size_>
+    template<class Point_>
     constexpr
-    Box<Repr_, Size_>::Box (Box::point_type lower_, Box::point_type upper_)
+    Box<Point_>::Box (Box::point_type lower_, Box::point_type upper_)
         : lower(lower_), upper(upper_) {
         // Nothing to do here
     }
 
-    template<class Repr_, std::size_t Size_>
-    constexpr bool Box<Repr_, Size_>::operator == (const Box& other) const {
+    template<class Point_>
+    constexpr bool Box<Point_>::operator == (const Box& other) const {
         return lower == other.lower && upper == other.upper;
     }
 
-    template<class Repr_, std::size_t Size_>
-    constexpr bool Box<Repr_, Size_>::operator != (const Box& other) const {
+    template<class Point_>
+    constexpr bool Box<Point_>::operator != (const Box& other) const {
         return !operator ==(other);
     }
 
 
     namespace tests {
 #ifdef GEOMETRY_COMPILE_TESTS
-        /* Ensure that a box is equal to its inverses */
+        /* Ensure that a box can be constructed */
         void box_construct_tests () {
-            constexpr Point<int, 3> prr = { 1, 1 };
-            constexpr Point<int, 3> prl = { 1, -1 };
-            constexpr Point<int, 3> plr = { -1, 1 };
-            constexpr Point<int, 3> pll = { -1, -1 };
+            using point_type = Point<int, 3>;
 
-            constexpr Box<int, 3> box1(pll, prr);
-            constexpr Box<int, 3> box2(plr, prl);
-            constexpr Box<int, 3> box3(prr, pll);
-            constexpr Box<int, 3> box4(prl, plr);
+            constexpr point_type prr = { +1, +1 };
+            constexpr point_type prl = { +1, -1 };
+            constexpr point_type plr = { -1, +1 };
+            constexpr point_type pll = { -1, -1 };
 
-            //            static_assert(box1 == box2, "Test ring-like construction");
-            //            static_assert(box2 == box3, "Test ring-like construction");
-            //            static_assert(box3 == box4, "Test ring-like construction");
-            //            static_assert(box4 == box1, "Test ring-like construction");
+            constexpr Box box1(pll, prr);
+            constexpr Box box2(plr, prl);
+            constexpr Box box3(prr, pll);
+            constexpr Box box4(prl, plr);
         }
 #endif
     }

@@ -7,11 +7,11 @@
 
 namespace index::detail
 {
-    template<class Record_, class Repr_, std::size_t Dims_, std::size_t M_, std::size_t m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
     struct RTreeBase
     {
         using base_type = RTreeBase;
-        using box_type = ::geom::Box<Repr_, Dims_>;
+        using box_type = Box_;
         using point_type = typename box_type::point_type;
         using size_type = typename box_type::size_type;
         constexpr static std::size_t capacity = M_;
@@ -31,10 +31,10 @@ namespace index::detail
         explicit RTreeBase (bool is_leaf) : _c_is_leaf(is_leaf) {}
     };
 
-    template<class Record_, class Repr_, std::size_t Dims_, std::size_t M_, std::size_t m_>
-    struct RTreeLeaf : public RTreeBase<Record_, Repr_, Dims_, M_, m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    struct RTreeLeaf : public RTreeBase<Record_, Box_, M_, m_>
     {
-        using base_type = RTreeBase<Record_, Repr_, Dims_, M_, m_>;
+        using base_type = RTreeBase<Record_, Box_, M_, m_>;
         using box_type = typename base_type::box_type;
         using point_type = typename base_type::point_type;
         using size_type = typename base_type::size_type;
@@ -53,10 +53,10 @@ namespace index::detail
         RTreeLeaf () : base_type(true) {}
     };
 
-    template<class Record_, class Repr_, std::size_t Dims_, std::size_t M_, std::size_t m_>
-    struct RTreeInner : public RTreeBase<Record_, Repr_, Dims_, M_, m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    struct RTreeInner : public RTreeBase<Record_, Box_, M_, m_>
     {
-        using base_type = RTreeBase<Record_, Repr_, Dims_, M_, m_>;
+        using base_type = RTreeBase<Record_, Box_, M_, m_>;
         using box_type = typename base_type::box_type;
         using point_type = typename base_type::point_type;
         using size_type = typename base_type::size_type;

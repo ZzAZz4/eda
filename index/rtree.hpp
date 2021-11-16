@@ -12,13 +12,13 @@ namespace index
         what () const noexcept override { return "Not implemented!\n"; }
     };
 
-    template<class Record_, class Repr_, std::size_t Dims_, std::size_t M_, std::size_t m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
     struct RTree
     {
     public:
-        using node_type = detail::RTreeBase<Record_, Repr_, Dims_, M_, m_>;
-        using leaf_node = detail::RTreeLeaf<Record_, Repr_, Dims_, M_, m_>;
-        using inner_node = detail::RTreeInner<Record_, Repr_, Dims_, M_, m_>;
+        using node_type = detail::RTreeBase<Record_, Box_, M_, m_>;
+        using leaf_node = detail::RTreeLeaf<Record_, Box_, M_, m_>;
+        using inner_node = detail::RTreeInner<Record_, Box_, M_, m_>;
 
         using node_pointer = node_type*;
         using leaf_pointer = leaf_node*;
