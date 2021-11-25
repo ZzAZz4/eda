@@ -77,7 +77,7 @@ namespace index {
             return true;
         }
 
-        /* Gets all the _records contained in the tree given a query box.
+        /* Gets all the records that intersect a query box in the tree.
          * Stores the result into the range starting at out.
          * Returns the end of the new range.
          * Usage:
@@ -88,22 +88,32 @@ namespace index {
         template<class OutputIter>
         OutputIter
         query (const box_type& box, OutputIter out) const {
-            return query_helper(root, box, out);
+            return _query_helper(root, box, out);
         }
 
     private:
         template<class OutputIter>
-        void
-        query_helper (
+        OutputIter
+        _query_helper (
             const_node_pointer base,
             const box_type& box, OutputIter out) const {
 
             if (base->_c_is_leaf) {
                 auto node = static_cast<const_leaf_pointer>(base);
-                throw not_implemented();
+                for (size_t i = 0; i < node->size; ++i) {
+                    if (geom::intersects(box, node->_boxes[i])) {
+                        *out++ = node->_records[i];
+                    }
+                }
+                return out;
             }
             auto node = static_cast<const_inner_pointer>(base);
-            throw not_implemented();
+            for (size_t i = 0; i < node->size; ++i) {
+                if (geom::intersects(box, node->_boxes[i])) {
+                    out = _query_helper(node->_records[i], box, out);
+                }
+            }
+            return out;
         }
 
         // Insert a mbr-record pair into the subtree rooted at base.

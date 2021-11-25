@@ -66,9 +66,7 @@ namespace index::detail {
         void cleanup() {
             for (size_t i = 0; i < this->size; ++i) {
                 ((record_type *)(&this->_records[i]))->~record_type();
-                std::cout << "Delete record\n";
             }
-            std::cout << "Delete leaf\n";
         }
     };
 
@@ -94,7 +92,6 @@ namespace index::detail {
                 auto* cur_ch = reinterpret_cast<record_type>(_records[i]);
                 delete cur_ch;
             }
-            std::cout << "Delete inner\n";
         }
     };
 }
