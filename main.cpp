@@ -22,9 +22,10 @@ int main () {
     tree.insert(testbox4, 6);
     tree.insert(testbox5, 7);
 
-    std::vector<int> result;
     box_type query_box({1, 2, 3}, {4, 5, 6});
+    std::vector<int> result;
     tree.query(query_box, std::back_inserter(result));
     for (auto i : result) std::cout << i << ' ';
+
     return 0;
 }
