@@ -3,11 +3,9 @@
 
 #include "point.hpp"
 
-namespace geom
-{
+namespace geom {
     template<class Point_>
-    struct Box
-    {
+    struct Box {
         using point_type = Point_;
         using size_type [[maybe_unused]] = typename point_type::size_type;
         using value_type [[maybe_unused]] = typename point_type::value_type;
@@ -21,7 +19,9 @@ namespace geom
         /* Constructor.
          * Creates a bbox that encloses both lower and upper,
          * regardless of order on each dimension */
-        constexpr Box (point_type lower_, point_type upper_);
+        constexpr explicit Box (
+            Box::point_type lower_ = Box::point_type{},
+            Box::point_type upper_ = Box::point_type{});
 
         /* Comparison */
         constexpr bool operator == (const Box& other) const;
