@@ -10,11 +10,11 @@ int main () {
 
     index_type tree;
 
-    geom::Box<point_type> testbox1({ 1, 2, 3 }, { 1, 2, 3 });
-    geom::Box<point_type> testbox2({ 2, 3, 4 }, { 2, 3, 4 });
-    geom::Box<point_type> testbox3({ 3, 4, 5 }, { 3, 4, 5 });
-    geom::Box<point_type> testbox4({ 4, 5, 6 }, { 4, 5, 6 });
-    geom::Box<point_type> testbox5({ 5, 6, 7 }, { 5, 6, 7 });
+    box_type testbox1({ 1, 2, 3 }, { 1, 2, 3 });
+    box_type testbox2({ 2, 3, 4 }, { 2, 3, 4 });
+    box_type testbox3({ 3, 4, 5 }, { 3, 4, 5 });
+    box_type testbox4({ 4, 5, 6 }, { 4, 5, 6 });
+    box_type testbox5({ 5, 6, 7 }, { 5, 6, 7 });
 
     tree.insert(testbox1, 3);
     tree.insert(testbox2, 4);
@@ -24,7 +24,6 @@ int main () {
     tree.insert(testbox4, 6);
     assert(tree.root->size == 2);
     tree.insert(testbox5, 7);
-
     std::cout << "Success\n";
     return 0;
 }

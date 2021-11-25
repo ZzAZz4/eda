@@ -57,7 +57,7 @@ namespace index {
                 root = static_cast<node_pointer>(node);
 
                 // this should... always work. If it doesn't I... just don't know what you have done
-                bool success = try_construct_at(node, box, record);
+                bool success = _try_construct_at(node, box, record);
                 assert(success);
                 return true;
             }
@@ -69,8 +69,8 @@ namespace index {
             // split the root
             auto new_root = new inner_node;
             // these two should never fail. Otw something is wrong
-            try_construct_at(new_root, prop->right.mbr, prop->right.node);
-            try_construct_at(new_root, prop->left.mbr, prop->left.node);
+            _try_construct_at(new_root, prop->right.mbr, prop->right.node);
+            _try_construct_at(new_root, prop->left.mbr, prop->left.node);
 
             // replace the root node
             root = new_root;
@@ -96,14 +96,14 @@ namespace index {
         void
         query_helper (
             const_node_pointer base,
-            const box_type& box,
-            OutputIter out)
-        const {
+            const box_type& box, OutputIter out) const {
 
             if (base->_c_is_leaf) {
                 auto node = static_cast<const_leaf_pointer>(base);
+                throw not_implemented();
             }
             auto node = static_cast<const_inner_pointer>(base);
+            throw not_implemented();
         }
 
         // Insert a mbr-record pair into the subtree rooted at base.
@@ -116,7 +116,7 @@ namespace index {
         ) {
             if (base->_c_is_leaf) { // is a leaf
                 auto node = static_cast<leaf_pointer>(base);
-                auto inserted = try_construct_at(node, box, record);
+                auto inserted = _try_construct_at(node, box, record);
                 if (inserted) { // no split required
                     return std::nullopt;
                 }
@@ -142,7 +142,7 @@ namespace index {
             node->_boxes[idx] = split.left.mbr;
             node->_records[idx] = split.left.node;
 
-            auto could_insert = try_construct_at(
+            auto could_insert = _try_construct_at(
                 node, split.right.mbr, split.right.node);
             if (could_insert) { // no split required
                 return std::nullopt;
@@ -167,7 +167,8 @@ namespace index {
         // insert an overflowing record into node.
         // This WILL (and MUST) cause a split.
         template<class Node>
-        Split _handle_split_insert (
+        Split
+        _handle_split_insert (
             Node* node,
             const box_type& box,
             const typename Node::record_type& record) {
@@ -199,12 +200,13 @@ namespace index {
             return result;
         }
 
-        // Distribute the box-pair records in `records` into the split `out_groups`
+        // Distribute the box-pair recs in `recs` into the split `out_groups`
         // WARNING: This alters the structure of out_groups. Beware of using it, outside regular splitting.
         // WARNING: This potentially alters memory directly. Any glitch/bug/segfault probably is happening here
         template<class Node>
-        void _distribute_groups (
-            std::pair<box_type, typename Node::record_type> (& records)[M_ + 1],
+        void
+        _distribute_groups (
+            std::pair<box_type, typename Node::record_type> (& recs)[M_ + 1],
             Split& out_groups) {
             auto left = static_cast<Node*>(out_groups.left.node);
             auto right = static_cast<Node*>(out_groups.right.node);
@@ -213,7 +215,7 @@ namespace index {
             using geom::join_enlargement;
             using geom::area;
 
-            for (auto&[bx, rec] : records) {
+            for (auto&[bx, rec] : recs) {
                 // calculate growth per group
                 auto left_enl = join_enlargement(out_groups.left.mbr, bx);
                 auto right_enl = join_enlargement(out_groups.right.mbr, bx);
@@ -222,12 +224,12 @@ namespace index {
                 // If a group is too full, it also skips it
                 if (left_enl < right_enl || right->size >= m_) { // left group
                     out_groups.left.mbr = join(out_groups.left.mbr, bx);
-                    try_construct_at(left, std::move(bx), std::move(rec));
+                    _try_construct_at(left, std::move(bx), std::move(rec));
                     continue;
                 }
                 if (right_enl < left_enl || left->size >= m_) { // right group
                     out_groups.right.mbr = join(out_groups.right.mbr, bx);
-                    try_construct_at(right, std::move(bx), std::move(rec));
+                    _try_construct_at(right, std::move(bx), std::move(rec));
                     continue;
                 }
                 // Tied, so choose the one with the smallest area
@@ -239,13 +241,12 @@ namespace index {
 
                 min_group.mbr = join(min_group.mbr, bx);
                 auto child_node = static_cast<Node*>(min_group.node);
-                try_construct_at(child_node, std::move(bx), std::move(rec));
+                _try_construct_at(child_node, std::move(bx), std::move(rec));
             }
         }
 
         template<class BoxPair>
         size_t _farthest_from_source (size_t src, BoxPair (& recs)[M_ + 1]) {
-
             using geom::min_sq_distance;
             const auto& src_box = recs[src].first;
 
@@ -261,7 +262,7 @@ namespace index {
 
         template<class Node>
         bool
-        try_construct_at (
+        _try_construct_at (
             Node* node,
             const box_type& box,
             const typename Node::record_type& record) {
