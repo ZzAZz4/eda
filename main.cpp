@@ -157,7 +157,7 @@ int main () {
 
     index_type tree;
 
-    int element_count = 20;
+    int element_count = 400;
 
     for (int i = 0; i < element_count; ++i) {
         point_type point{i, i + 1, i + 2};
