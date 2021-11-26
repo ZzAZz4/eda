@@ -165,7 +165,7 @@ int main () {
         tree.insert(box, (int) i + 3);
     }
 
-    box_type query_box({ 1, 2, 3 }, { 4, 5, 6 });
+    box_type query_box({ 273, 274, 275 }, { 275, 276, 277 });
     std::vector<int> result;
     tree.query(query_box, std::back_inserter(result));
     for (auto i : result) std::cout << i << ' ';
