@@ -1,7 +1,6 @@
 #ifndef EDA_RTREE_HPP
 #define EDA_RTREE_HPP
 
-#include <mmcobj.h>
 #include "rtree_node.hpp"
 #include "../geometry/ops.hpp"
 
