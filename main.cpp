@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <deque>
+#include <fstream>
 
 
 using point_type = geom::Point<int, 3>;
@@ -14,7 +15,7 @@ struct TreePrinter {
 
     struct TextBlock {
         std::deque<std::string> lines;
-        std::size_t size;
+        std::size_t size{};
     };
 
     static std::string
@@ -96,7 +97,8 @@ struct TreePrinter {
         lo_os << "|";
         auto up_str = up_os.str();
         auto lo_str = lo_os.str();
-        return {{ up_str, lo_str }, up_str.size() };
+        auto size = up_str.size();
+        return {{ up_str, lo_str }, size };
     }
 
     static TextBlock
@@ -155,16 +157,12 @@ int main () {
 
     index_type tree;
 
-    std::vector<point_type> points = {
-        {1, 2, 3},
-        {2, 3, 4},
-        {3, 4, 5},
-        {4, 5, 6},
-        {5, 6, 7},
-    };
+    int element_count = 20;
 
-    for (size_t i = 0; i < points.size(); ++i) {
-        tree.insert(box_type{points[i], points[i]}, (int) i + 3);
+    for (int i = 0; i < element_count; ++i) {
+        point_type point{i, i + 1, i + 2};
+        box_type box{point, point};
+        tree.insert(box, (int) i + 3);
     }
 
     box_type query_box({ 1, 2, 3 }, { 4, 5, 6 });
@@ -173,7 +171,8 @@ int main () {
     for (auto i : result) std::cout << i << ' ';
     std::cout << '\n';
 
-    std::cout << TreePrinter::stringify(tree);
+    std::ofstream test("tree_pprint.txt");
+    test << TreePrinter::stringify(tree);
 
     return 0;
 }
