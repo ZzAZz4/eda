@@ -4,7 +4,7 @@
 #include <sstream>
 #include <deque>
 #include <fstream>
-
+#include <vector>
 
 using point_type = geom::Point<int, 3>;
 using box_type = geom::Box<point_type>;
