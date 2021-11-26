@@ -155,17 +155,17 @@ int main () {
 
     index_type tree;
 
-    box_type testbox1({ 1, 2, 3 }, { 1, 2, 3 });
-    box_type testbox2({ 2, 3, 4 }, { 2, 3, 4 });
-    box_type testbox3({ 3, 4, 5 }, { 3, 4, 5 });
-    box_type testbox4({ 4, 5, 6 }, { 4, 5, 6 });
-    box_type testbox5({ 5, 6, 7 }, { 5, 6, 7 });
+    std::vector<point_type> points = {
+        {1, 2, 3},
+        {2, 3, 4},
+        {3, 4, 5},
+        {4, 5, 6},
+        {5, 6, 7},
+    };
 
-    tree.insert(testbox1, 3);
-    tree.insert(testbox2, 4);
-    tree.insert(testbox3, 5);
-    tree.insert(testbox4, 6);
-    tree.insert(testbox5, 7);
+    for (size_t i = 0; i < points.size(); ++i) {
+        tree.insert(box_type{points[i], points[i]}, (int) i + 3);
+    }
 
     box_type query_box({ 1, 2, 3 }, { 4, 5, 6 });
     std::vector<int> result;
