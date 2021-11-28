@@ -70,10 +70,10 @@ namespace geom {
         typename Box<Point_>::value_type cost{};
 
         for (std::size_t dim = 0; dim < Point_::size(); ++dim)
-            cost = cost + std::max(0, base.lower[dim] - ext.lower[dim]);
+            cost = cost + std::max((base.lower[dim] - base.lower[dim]), base.lower[dim] - ext.lower[dim]);
 
         for (std::size_t dim = 0; dim < Point_::size(); ++dim)
-            cost = cost + std::max(0, ext.upper[dim] - base.upper[dim]);
+            cost = cost + std::max((ext.upper[dim] - ext.upper[dim]), ext.upper[dim] - base.upper[dim]);
 
         return cost;
     }

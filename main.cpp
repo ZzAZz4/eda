@@ -1,14 +1,19 @@
 //#define GEOMETRY_COMPILE_TESTS
 #include "index/rtree.hpp"
+#include "2015-data/fill_rtree_csv.hpp"
 #include <iostream>
 #include <sstream>
 #include <deque>
 #include <fstream>
 #include <vector>
 
-using point_type = geom::Point<int, 3>;
+// using point_type = geom::Point<int, 3>;
+// using box_type = geom::Box<point_type>;
+// using index_type = index::RTree<int, box_type, 4>;
+
+using point_type = geom::Point<double, 2>;
 using box_type = geom::Box<point_type>;
-using index_type = index::RTree<int, box_type, 4>;
+using index_type = index::RTree<std::string, box_type, 3>;
 
 struct TreePrinter {
     using Tree = index_type;
@@ -153,20 +158,35 @@ struct TreePrinter {
     }
 };
 
+// int main () {
+
+//     index_type tree;
+//     int element_count = 400;
+
+//     for (int i = 0; i < element_count; ++i) {
+//         point_type point{i, i + 1, i + 2};
+//         box_type box{point, point};
+//         tree.insert(box, (int) i + 3);
+//     }
+
+//     box_type query_box({ 273, 274, 275 }, { 275, 276, 277 });
+//     std::vector<int> result;
+//     tree.query(query_box, std::back_inserter(result));
+//     for (auto i : result) std::cout << i << ' ';
+//     std::cout << '\n';
+
+//     std::ofstream test("tree_pprint.txt");
+//     test << TreePrinter::stringify(tree);
+
+//     return 0;
+// }
 int main () {
 
     index_type tree;
+    rtree_filler(tree);
 
-    int element_count = 400;
-
-    for (int i = 0; i < element_count; ++i) {
-        point_type point{i, i + 1, i + 2};
-        box_type box{point, point};
-        tree.insert(box, (int) i + 3);
-    }
-
-    box_type query_box({ 273, 274, 275 }, { 275, 276, 277 });
-    std::vector<int> result;
+    box_type query_box({ 273, 274 }, { 275, 276 });
+    std::vector<std::string> result;
     tree.query(query_box, std::back_inserter(result));
     for (auto i : result) std::cout << i << ' ';
     std::cout << '\n';

@@ -96,6 +96,8 @@ namespace index {
         _query_helper (
             const_node_pointer base,
             const box_type& box, OutputIter out) const {
+                
+            if (base == nullptr) return out;
 
             if (base->_c_is_leaf) {
                 auto node = static_cast<const_leaf_pointer>(base);

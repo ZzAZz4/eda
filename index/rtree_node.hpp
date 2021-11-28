@@ -21,6 +21,10 @@ namespace index::detail {
         using base_type = RTreeBase;
         using leaf_type = RTreeLeaf<Record_, Box_, M_, m_>;
         using inner_type = RTreeInner<Record_, Box_, M_, m_>;
+        
+        // aid in debugging
+        inner_type* inner = (inner_type*)(this);
+        leaf_type* leaf = (leaf_type*)(this);
 
         using box_type = Box_;
         using point_type = typename box_type::point_type;
@@ -33,6 +37,7 @@ namespace index::detail {
         const bool _c_is_leaf;
         size_type size = 0;
         box_storage _boxes[capacity];
+        
 
         explicit RTreeBase (bool is_leaf) : _c_is_leaf(is_leaf) {}
 
