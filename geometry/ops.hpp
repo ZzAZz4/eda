@@ -25,7 +25,7 @@ namespace geom {
             const bool gap_exists = lhs.upper[dim] < rhs.lower[dim] ||
                                     rhs.upper[dim] < lhs.lower[dim];
 
-            if (gap_exists) return false;
+            if (gap_exists) { return false; }
         }
         return true;
     }
@@ -34,17 +34,20 @@ namespace geom {
     constexpr std::optional<Box < Point_>>
 
     intersection (const Box <Point_>& lhs, const Box <Point_>& rhs) {
-        if (!intersects(lhs, rhs))
+        if (!intersects(lhs, rhs)) {
             return std::nullopt;
+        }
 
         Point_ lower{};
         Point_ upper{};
 
-        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             lower[dim] = std::max(lhs.lower[dim], rhs.lower[dim]);
+        }
 
-        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             upper[dim] = std::min(lhs.upper[dim], rhs.upper[dim]);
+        }
 
         return Box<Point_>(lower, upper);
     }
@@ -55,11 +58,13 @@ namespace geom {
         Point_ lower{};
         Point_ upper{};
 
-        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             lower[dim] = std::min(lhs.lower[dim], rhs.lower[dim]);
+        }
 
-        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             upper[dim] = std::max(lhs.upper[dim], rhs.upper[dim]);
+        }
 
         return Box<Point_>(lower, upper);
     }
@@ -69,11 +74,15 @@ namespace geom {
     join_enlargement (const Box <Point_>& base, const Box <Point_>& ext) {
         typename Box<Point_>::value_type cost{};
 
-        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
-            cost = cost + std::max((base.lower[dim] - base.lower[dim]), base.lower[dim] - ext.lower[dim]);
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
+            cost = cost +
+                   std::max((base.lower[dim] - base.lower[dim]), base.lower[dim] - ext.lower[dim]);
+        }
 
-        for (std::size_t dim = 0; dim < Point_::size(); ++dim)
-            cost = cost + std::max((ext.upper[dim] - ext.upper[dim]), ext.upper[dim] - base.upper[dim]);
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
+            cost = cost +
+                   std::max((ext.upper[dim] - ext.upper[dim]), ext.upper[dim] - base.upper[dim]);
+        }
 
         return cost;
     }
@@ -107,7 +116,7 @@ namespace geom {
             const bool gap_exists = lhs.upper[dim] < rhs.lower[dim] ||
                                     rhs.upper[dim] < lhs.lower[dim];
 
-            if (!gap_exists) continue;
+            if (!gap_exists) { continue; }
 
             temporary[dim] = std::max(
                 std::max(value{}, rhs.lower[dim] - lhs.upper[dim]),
