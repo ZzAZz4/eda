@@ -6,10 +6,6 @@
 
 using namespace csv;
 
-using point_type = geom::Point<double, 2>;
-using box_type = geom::Box<point_type>;
-using index_type = index::RTree<std::string, box_type, (8 << 10) / sizeof(box_type)>;
-
 // (there are fancier ways to do this automatically with 
 // preprocessor directives but for now this will do)
 
@@ -25,7 +21,8 @@ using index_type = index::RTree<std::string, box_type, (8 << 10) / sizeof(box_ty
 namespace fs = std::filesystem;
 
 // Outputs a vector of file directories in a select path 
-static std::vector<fs::path> files_in_folder (const fs::path& path) {
+static std::vector<fs::path>
+files_in_folder (const fs::path& path) {
     std::vector<fs::path> fileNamePaths;
     if (!exists(path)) {
         return fileNamePaths;
@@ -53,10 +50,10 @@ static std::vector<fs::path> files_in_folder (const fs::path& path) {
 // After insertion is implemented: Receives a 2d rtree storing std::string records,
 // inserting the (lat, long) -> date&time data obtained from parsing the csv files.
 
-bool rtree_filler (index_type& tree) {
-    std::cout << "Current path is " << fs::current_path() << std::endl;
-    std::vector<fs::path> vec = files_in_folder("../2015-data/data/");
-
+template<class OutIt_>
+void
+fetch_locations (const fs::path& folder, OutIt_ out) {
+    std::vector<fs::path> vec = files_in_folder(folder);
 
     for (const fs::path& entry : vec) {
         CSVFormat format;
@@ -70,24 +67,15 @@ bool rtree_filler (index_type& tree) {
         std::string plon_label = file[0] == 'g' ? "Pickup_longitude" : "pickup_longitude";
         std::string plat_label = file[0] == 'g' ? "Pickup_latitude" : "pickup_latitude";
 
-        std::cout << entry.string() << '\n';
-
-        int i = 1;
+        std::cout << "File: " << file << std::endl;
 
         for (const auto& row : reader) {
             auto node_name = row[pickup_label].get<std::string>();
-            auto y = row[plon_label].get<double>();
-            auto x = row[plat_label].get<double>();
+            auto lat = row[plat_label].get<double>();
+            auto lon = row[plon_label].get<double>();
 
-            point_type point{ y, x };
-            box_type box{ point, point };
-            tree.insert(box, node_name);
-            if ((i - 1) % (256 * 256) == 0) {
-                std::cout << i << std::endl;
-            }
-            i++;
+            std::pair<point_type, std::string> record{{ lat, lon }, node_name };
+            *out++ = record;
         }
-
     }
-    return true;
 }

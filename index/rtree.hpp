@@ -6,15 +6,7 @@
 
 
 namespace index {
-    struct not_implemented : std::exception {
-        [[nodiscard]] const char*
-        what () const noexcept override { return "Not implemented!\n"; }
-    };
-
-    template<class Record_,
-        class Box_,
-        std::size_t M_,
-        std::size_t m_ = M_ / 2>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2>
     struct RTree {
     public:
         using node_type = detail::RTreeBase<Record_, Box_, M_, m_>;
@@ -31,7 +23,13 @@ namespace index {
         using point_type = typename node_type::point_type;
         using record_type = Record_;
 
+        constexpr static auto capacity = M_;
+
     private:
+        constexpr static auto max_left_rebuild_size = m_;
+        constexpr static auto max_right_rebuild_size = M_ + 1 - m_;
+        static_assert((M_ + 1) == max_left_rebuild_size + max_right_rebuild_size);
+
         struct Split {
             struct Item { box_type mbr; node_pointer node; };
 
@@ -96,10 +94,12 @@ namespace index {
         _query_helper (
             const_node_pointer base,
             const box_type& box, OutputIter out) const {
-                
-            if (base == nullptr) return out;
 
-            if (base->_c_is_leaf) {
+            if (base == nullptr) {
+                return out;
+            }
+
+            if (base->is_leaf) {
                 auto node = static_cast<const_leaf_pointer>(base);
                 for (size_t i = 0; i < node->size; ++i) {
                     if (geom::intersects(box, node->_boxes[i])) {
@@ -125,7 +125,7 @@ namespace index {
             const box_type& box,
             const record_type& record
         ) {
-            if (base->_c_is_leaf) { // is a leaf
+            if (base->is_leaf) { // is a leaf
                 auto node = static_cast<leaf_pointer>(base);
                 auto inserted = _try_construct_at(node, box, record);
                 if (inserted) { // no split required
@@ -206,6 +206,8 @@ namespace index {
             Split result{{ records[E1_idx].first, node },
                          { records[E2_idx].first, new Node }};
 
+            assert(result.left.node->size == 0 && result.right.node->size == 0);
+
             // Distribute records into result.
             _distribute_groups<Node>(records, result);
             return result;
@@ -219,41 +221,43 @@ namespace index {
         _distribute_groups (
             std::pair<box_type, typename Node::record_type> (& recs)[M_ + 1],
             Split& out_groups) {
-            auto left = static_cast<Node*>(out_groups.left.node);
-            auto right = static_cast<Node*>(out_groups.right.node);
-
             using geom::join;
             using geom::join_enlargement;
             using geom::area;
 
+            const auto do_construct_on_choice = [] (auto& group, auto&& bx, auto&& rec) {
+                auto group_node = static_cast<Node*>(group.node);
+                group.mbr = join(group.mbr, bx);
+                _try_construct_at(
+                    group_node,
+                    std::forward<decltype(bx)>(bx),
+                    std::forward<decltype(rec)>(rec));
+            };
+
             for (auto&[bx, rec] : recs) {
-                // calculate growth per group
-                auto left_enl = join_enlargement(out_groups.left.mbr, bx);
-                auto right_enl = join_enlargement(out_groups.right.mbr, bx);
+                const bool left_full = out_groups.left.node->size == max_left_rebuild_size;
+                const bool right_full = out_groups.right.node->size == max_right_rebuild_size;
+                const auto left_enl = join_enlargement(out_groups.left.mbr, bx);
+                const auto right_enl = join_enlargement(out_groups.right.mbr, bx);
+                const auto left_area = area(out_groups.left.mbr);
+                const auto right_area = area(out_groups.right.mbr);
 
                 // Select the group that requires the least growth.
-                // If a group is too full, it also skips it
-                if (left_enl < right_enl || right->size >= m_) { // left group
-                    out_groups.left.mbr = join(out_groups.left.mbr, bx);
-                    _try_construct_at(left, std::move(bx), std::move(rec));
-                    continue;
+                // If a group is too full, it also skips it. Fuee!
+                if (right_full || (!left_full && (left_enl < right_enl))) { // left group
+                    do_construct_on_choice(out_groups.left, std::move(bx), std::move(rec));
                 }
-                if (right_enl < left_enl || left->size >= m_) { // right group
-                    out_groups.right.mbr = join(out_groups.right.mbr, bx);
-                    _try_construct_at(right, std::move(bx), std::move(rec));
-                    continue;
+                else if (left_full || (!right_full && (right_enl < left_enl))) { // right group
+                    do_construct_on_choice(out_groups.right, std::move(bx), std::move(rec));
                 }
-                // Tied, so choose the one with the smallest area
-                auto left_area = area(out_groups.left.mbr);
-                auto right_area = area(out_groups.right.mbr);
-
-                auto& min_group = right_area < left_area ? out_groups.right
-                                                         : out_groups.left;
-
-                min_group.mbr = join(min_group.mbr, bx);
-                auto child_node = static_cast<Node*>(min_group.node);
-                _try_construct_at(child_node, std::move(bx), std::move(rec));
+                else { // Tied, so choose the one with the smallest area
+                    auto& min_group = right_area < left_area ? out_groups.right : out_groups.left;
+                    do_construct_on_choice(min_group, std::move(bx), std::move(rec));
+                }
             }
+
+            assert(out_groups.left.node->size == max_left_rebuild_size);
+            assert(out_groups.right.node->size == max_right_rebuild_size);
         }
 
         template<class BoxPair>
@@ -272,7 +276,7 @@ namespace index {
         }
 
         template<class Node>
-        bool
+        static bool
         _try_construct_at (
             Node* node,
             const box_type& box,
@@ -284,6 +288,29 @@ namespace index {
             node->_records[node->size] = record;
             node->size++;
             return true;
+        }
+
+    public:
+        template<class OIter>
+        OIter get_all (OIter out) const {
+            return _get_all_helper(root, out);
+        }
+
+    private:
+        template<class OIter>
+        OIter _get_all_helper (const_node_pointer base, OIter out) const {
+            if (base->is_leaf) { // is a leaf
+                auto node = static_cast<const_leaf_pointer>(base);
+                for (size_t i = 0; i < node->size; ++i) {
+                    *out++ = node->_records[i];
+                }
+                return out;
+            }
+            auto node = static_cast<const_inner_pointer>(base);
+            for (size_t i = 0; i < node->size; ++i) {
+                out = _get_all_helper(node->_records[i], out);
+            }
+            return out;
         }
     };
 }

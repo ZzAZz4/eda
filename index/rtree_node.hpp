@@ -34,19 +34,19 @@ namespace index::detail {
 
         using box_storage = box_type;
 
-        const bool _c_is_leaf;
+        const bool is_leaf;
         size_type size = 0;
         box_storage _boxes[capacity];
         
 
-        explicit RTreeBase (bool is_leaf) : _c_is_leaf(is_leaf) {}
+        explicit RTreeBase (bool is_leaf) : is_leaf(is_leaf) {}
 
         ~RTreeBase () {
             for (size_t i = 0; i < size; ++i) {
                 auto* cur_box = reinterpret_cast<box_type*>((&_boxes[i]));
                 cur_box->~box_type();
             }
-            if (_c_is_leaf) ((leaf_type*)(this))->cleanup();
+            if (is_leaf) ((leaf_type*)(this))->cleanup();
             else ((inner_type*)(this))->cleanup();
         }
     };
