@@ -59,7 +59,8 @@ bool rtree_filler(index_type tree){
 		CSVFormat format;
 		format.header_row(0);
 		format.delimiter(',');
-		format.variable_columns(true);
+		format.variable_columns(false);
+		// format.trim_chars(' ');
 		CSVReader reader(entry.u8string(), format);
 		std::string file = fs::path(entry).filename();
 		char t = file[0];
@@ -74,6 +75,8 @@ bool rtree_filler(index_type tree){
 				int cnt = 0;
 				std::cout << "green csv\n";
 				for (auto& row: reader){
+					if (cnt == 812961)
+						std::cout<< "cursed csv line\n";
 					std::string node_name = row["lpep_pickup_datetime"].get<std::string>();
 					double y = row["Pickup_longitude"].get<double>();
 					double x = row["Pickup_latitude"].get<double>();

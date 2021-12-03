@@ -36,3 +36,4 @@ cmake-build-*
 #dirs
 2015-data/data/
 build/
+.vscode/
