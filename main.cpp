@@ -11,9 +11,9 @@
 // using box_type = geom::Box<point_type>;
 // using index_type = index::RTree<int, box_type, 4>;
 
-using point_type = geom::Point<double, 2>;
-using box_type = geom::Box<point_type>;
-using index_type = index::RTree<std::string, box_type, 3>;
+//using point_type = geom::Point<double, 2>;
+//using box_type = geom::Box<point_type>;
+//using index_type = index::RTree<std::string, box_type, 3>;
 
 struct TreePrinter {
     using Tree = index_type;
@@ -26,7 +26,7 @@ struct TreePrinter {
     static std::string
     repeat (const std::string& str, unsigned repeats) {
         std::string result;
-        while (repeats--) result += str;
+        while (repeats--) { result += str; }
         return result;
     }
 
@@ -185,14 +185,12 @@ int main () {
     index_type tree;
     rtree_filler(tree);
 
-    box_type query_box({ 273, 274 }, { 275, 276 });
+    box_type query_box({ -73.86501312, 40.8260994 }, { -73.86501312, 40.8260994 });
     std::vector<std::string> result;
-    tree.query(query_box, std::back_inserter(result));
-    for (auto i : result) std::cout << i << ' ';
-    std::cout << '\n';
+    auto inserter = std::back_inserter(result);
+    tree.query(query_box, inserter);
+    for (const auto& i : result) { std::cout << i << ' '; }
 
-    std::ofstream test("tree_pprint.txt");
-    test << TreePrinter::stringify(tree);
 
     return 0;
 }
