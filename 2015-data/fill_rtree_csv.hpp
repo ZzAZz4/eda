@@ -62,7 +62,7 @@ bool rtree_filler (index_type& tree) {
         CSVFormat format;
         format.header_row(0);
         format.delimiter(',');
-        format.variable_columns(true);
+        format.variable_columns(false);
         CSVReader reader(entry.u8string(), format);
         std::string file = fs::path(entry).filename().string();
 
