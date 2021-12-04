@@ -5,7 +5,7 @@
 
 using point_type = geom::Point<double, 2>;
 using box_type = geom::Box<point_type>;
-using index_type = index::RTree<std::string, box_type, 127>;
+using index_type = index::RTree<std::string, box_type, 4>;
 
 #include "2015-data/fetch.hpp"
 
@@ -36,19 +36,8 @@ create_index (const std::string& path) {
 }
 
 int main () {
-    index_type tree = create_index("../2015-data/data/");
-    box_type query_box(
-        { -73.922592163085938, 40.754528045654297 },
-        { -73.922592163085938, 40.754528045654297 });
-    tree.insert(query_box, "a");
-
-    std::vector<std::string> result;
-    auto inserter = std::back_inserter(result);
-    tree.query(query_box, inserter);
-
-    for (const auto& i : result) {
-        std::cout << i << std::endl;
+    for (int i = 0; i < 1024 * 1024; ++i) {
+        index_type tree = create_index("../2015-data/j8/");
     }
-
     return 0;
 }

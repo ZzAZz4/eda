@@ -1,9 +1,53 @@
 #ifndef EDA_RTREE_HPP
 #define EDA_RTREE_HPP
 
+#include <iostream>
 #include "rtree_node.hpp"
 #include "../geometry/ops.hpp"
 
+namespace index {
+    namespace detail {
+        template<size_t M_, class BoxPair>
+        static size_t
+        _farthest_from_source (size_t src, BoxPair (& recs)[M_]) {
+            using geom::min_sq_distance;
+            const auto& src_box = recs[src].first;
+
+            auto it = std::max_element(
+                recs, recs + M_, [&src_box] (const auto& a, const auto& b) {
+                    return min_sq_distance(src_box, a.first) <
+                           min_sq_distance(src_box, b.first);
+                });
+
+            auto res_idx = std::distance(recs, it);
+            return res_idx;
+        }
+
+        template<class Box, class Node, class Record = typename Node::record_type>
+        static bool
+        _try_construct_at (Node* node, const Box& box, const Record& record) {
+            if (node->size == node->capacity) {
+                return false;
+            }
+            node->_boxes[node->size] = box;
+            node->_records[node->size] = record;
+            node->size++;
+            return true;
+        }
+
+        template<class It, class Box>
+        static size_t
+        _min_enlargement_index (It begin, size_t size, const Box& box) {
+            using geom::join_enlargement;
+            auto it = std::min_element(
+                begin, begin + size, [&box] (const auto& a, const auto& b) {
+                    return join_enlargement(a, box) < join_enlargement(b, box);
+                });
+            auto index = std::distance(begin, it);
+            return index;
+        }
+    }
+}
 
 namespace index {
     template<class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2>
@@ -31,7 +75,10 @@ namespace index {
         static_assert((M_ + 1) == max_left_rebuild_size + max_right_rebuild_size);
 
         struct Split {
-            struct Item { box_type mbr; node_pointer node; };
+            struct Item {
+                box_type mbr;
+                node_pointer node;
+            };
 
             Item left;
             Item right;
@@ -54,7 +101,7 @@ namespace index {
                 root = static_cast<node_pointer>(node);
 
                 // this should... always work. If it doesn't I... just don't know what you have done
-                bool success = _try_construct_at(node, box, record);
+                bool success = detail::_try_construct_at(node, box, record);
                 assert(success);
                 return true;
             }
@@ -66,8 +113,8 @@ namespace index {
             // split the root
             auto new_root = new inner_node;
             // these two should never fail. Otw something is wrong
-            _try_construct_at(new_root, prop->right.mbr, prop->right.node);
-            _try_construct_at(new_root, prop->left.mbr, prop->left.node);
+            detail::_try_construct_at(new_root, prop->right.mbr, prop->right.node);
+            detail::_try_construct_at(new_root, prop->left.mbr, prop->left.node);
 
             // replace the root node
             root = new_root;
@@ -91,15 +138,12 @@ namespace index {
     private:
         template<class OutputIter>
         OutputIter
-        _query_helper (
-            const_node_pointer base,
-            const box_type& box, OutputIter out) const {
-
-            if (base == nullptr) {
+        _query_helper (const_node_pointer base, const box_type& box, OutputIter out) const {
+            if (base == nullptr) { // if nothing, welp... do nothing
                 return out;
             }
 
-            if (base->is_leaf) {
+            if (base->is_leaf) { // if leaf, just search on the local range for intersections
                 auto node = static_cast<const_leaf_pointer>(base);
                 for (size_t i = 0; i < node->size; ++i) {
                     if (geom::intersects(box, node->_boxes[i])) {
@@ -108,6 +152,7 @@ namespace index {
                 }
                 return out;
             }
+            // else, search on the subtrees whose mbr intersects the query box
             auto node = static_cast<const_inner_pointer>(base);
             for (size_t i = 0; i < node->size; ++i) {
                 if (geom::intersects(box, node->_boxes[i])) {
@@ -120,14 +165,10 @@ namespace index {
         // Insert a mbr-record pair into the subtree rooted at base.
         // Returns `std::nullopt` (nothing) or a propagated split.
         std::optional<Split>
-        _insert_helper (
-            node_pointer base,
-            const box_type& box,
-            const record_type& record
-        ) {
+        _insert_helper (node_pointer base, const box_type& box, const record_type& record) {
             if (base->is_leaf) { // is a leaf
                 auto node = static_cast<leaf_pointer>(base);
-                auto inserted = _try_construct_at(node, box, record);
+                auto inserted = detail::_try_construct_at(node, box, record);
                 if (inserted) { // no split required
                     return std::nullopt;
                 }
@@ -138,7 +179,7 @@ namespace index {
             auto node = static_cast<inner_pointer>(base);
 
             // pick the entry which requires minimal enlargement.
-            size_t idx = min_enlargement_index(node->_boxes, node->size, box);
+            size_t idx = detail::_min_enlargement_index(node->_boxes, node->size, box);
 
             // insert in that entry. This may propagate a split.
             auto prop = _insert_helper(node->_records[idx], box, record);
@@ -153,26 +194,13 @@ namespace index {
             node->_boxes[idx] = split.left.mbr;
             node->_records[idx] = split.left.node;
 
-            auto could_insert = _try_construct_at(
-                node, split.right.mbr, split.right.node);
+            auto could_insert = detail::_try_construct_at(node, split.right.mbr, split.right.node);
             if (could_insert) { // no split required
                 return std::nullopt;
             }
             // create split and propagate to caller
             return _handle_split_insert<inner_node>(
                 node, split.right.mbr, split.right.node);
-        }
-
-        template<class It>
-        size_t
-        min_enlargement_index (It begin, size_t size, const box_type& box) {
-            using geom::join_enlargement;
-            auto it = std::min_element(
-                begin, begin + size, [&box] (const auto& a, const auto& b) {
-                    return join_enlargement(a, box) < join_enlargement(b, box);
-                });
-            auto index = std::distance(begin, it);
-            return index;
         }
 
         // insert an overflowing record into node.
@@ -198,8 +226,8 @@ namespace index {
             // If you are wondering if this actually returns the most distant pair in the entire set... No it doesn't.
             // It returns a very close approximate tho.
             // And this function is already just a heuristic, so no need to do fancy stuff
-            auto E1_idx = _farthest_from_source(0, records);
-            auto E2_idx = _farthest_from_source(E1_idx, records);
+            auto E1_idx = detail::_farthest_from_source<M_ + 1>(0, records);
+            auto E2_idx = detail::_farthest_from_source<M_ + 1>(E1_idx, records);
 
             // Create a split with two groups. Reusing the node because... I can...
             node->size = 0;
@@ -217,7 +245,7 @@ namespace index {
         // WARNING: This alters the structure of out_groups. Beware of using it, outside regular splitting.
         // WARNING: This potentially alters memory directly. Any glitch/bug/segfault probably is happening here
         template<class Node>
-        void
+        static void
         _distribute_groups (
             std::pair<box_type, typename Node::record_type> (& recs)[M_ + 1],
             Split& out_groups) {
@@ -228,7 +256,7 @@ namespace index {
             const auto do_construct_on_choice = [] (auto& group, auto&& bx, auto&& rec) {
                 auto group_node = static_cast<Node*>(group.node);
                 group.mbr = join(group.mbr, bx);
-                _try_construct_at(
+                detail::_try_construct_at(
                     group_node,
                     std::forward<decltype(bx)>(bx),
                     std::forward<decltype(rec)>(rec));
@@ -255,50 +283,21 @@ namespace index {
                     do_construct_on_choice(min_group, std::move(bx), std::move(rec));
                 }
             }
-
             assert(out_groups.left.node->size == max_left_rebuild_size);
             assert(out_groups.right.node->size == max_right_rebuild_size);
         }
 
-        template<class BoxPair>
-        size_t _farthest_from_source (size_t src, BoxPair (& recs)[M_ + 1]) {
-            using geom::min_sq_distance;
-            const auto& src_box = recs[src].first;
-
-            auto it = std::max_element(
-                recs, recs + M_ + 1, [&src_box] (const auto& a, const auto& b) {
-                    return min_sq_distance(src_box, a.first) <
-                           min_sq_distance(src_box, b.first);
-                });
-
-            auto res_idx = std::distance(recs, it);
-            return res_idx;
-        }
-
-        template<class Node>
-        static bool
-        _try_construct_at (
-            Node* node,
-            const box_type& box,
-            const typename Node::record_type& record) {
-            if (node->size == node->capacity) {
-                return false;
-            }
-            node->_boxes[node->size] = box;
-            node->_records[node->size] = record;
-            node->size++;
-            return true;
-        }
-
     public:
         template<class OIter>
-        OIter get_all (OIter out) const {
+        OIter
+        get_all (OIter out) const {
             return _get_all_helper(root, out);
         }
 
     private:
         template<class OIter>
-        OIter _get_all_helper (const_node_pointer base, OIter out) const {
+        OIter
+        _get_all_helper (const_node_pointer base, OIter out) const {
             if (base->is_leaf) { // is a leaf
                 auto node = static_cast<const_leaf_pointer>(base);
                 for (size_t i = 0; i < node->size; ++i) {
