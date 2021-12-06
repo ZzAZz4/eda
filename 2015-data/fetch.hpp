@@ -35,8 +35,8 @@ files_in_folder (const fs::path& path) {
     return fileNamePaths;
 }
 
-template<class OutIt>
-OutIt try_fetch_locations (const fs::path& path, bool variable_cols, OutIt out);
+template<class Vec>
+Vec try_fetch_locations (const fs::path& path, bool variable_cols);
 
 /* CSV STRUCTURE */
 
@@ -53,23 +53,29 @@ OutIt try_fetch_locations (const fs::path& path, bool variable_cols, OutIt out);
 // After insertion is implemented: Receives a 2d rtree storing std::string records,
 // inserting the (lat, long) -> date&time data obtained from parsing the csv files.
 
-template<class OutIt_>
-OutIt_
-fetch_locations (const fs::path& folder, OutIt_ out) {
+template<class Vec>
+Vec
+fetch_locations (const fs::path& folder) {
     std::vector<fs::path> vec = files_in_folder(folder);
+    Vec res;
 
     for (const fs::path& entry : vec) {
+        Vec temp;
         try {
-            out = try_fetch_locations(entry, true, out);
+            temp = try_fetch_locations<Vec>(entry, true);
         } catch (std::runtime_error&) {
-            out = try_fetch_locations(entry, false, out);
+            temp = try_fetch_locations<Vec>(entry, false);
         }
+        std::copy(temp.begin(), temp.end(), std::back_inserter(res));
     }
-    return out;
+    return res;
 }
 
-template<class OutIt>
-OutIt try_fetch_locations (const fs::path& path, bool variable_cols, OutIt out) {
+template<class Vec>
+Vec try_fetch_locations (const fs::path& path, bool variable_cols) {
+    Vec res;
+    auto out = std::back_inserter(res);
+
     CSVFormat format;
     format.header_row(0);
     format.delimiter(',');
@@ -92,5 +98,5 @@ OutIt try_fetch_locations (const fs::path& path, bool variable_cols, OutIt out) 
         std::pair<point_type, std::string> record{{ lat, lon }, node_name };
         *out++ = record;
     }
-    return out;
+    return res;
 }
