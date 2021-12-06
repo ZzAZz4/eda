@@ -12,7 +12,7 @@ namespace geom
         using value_type = Repr_;
         using size_type = std::size_t;
 
-        std::array<value_type, Size_> _m_buff{};
+        value_type _m_buff[Size_];
 
         /* Number of dimensions */
         constexpr static size_type size ();

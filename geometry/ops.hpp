@@ -3,79 +3,147 @@
 
 #include "box.hpp"
 #include <optional>
+#include <algorithm>
+#include <numeric>
+#include <cmath>
 
-namespace geom
-{
-    template<class Repr_, std::size_t Size_>
+namespace geom {
+    template<class Point_>
+    constexpr auto
+    area (const Box <Point_>& box) {
+        typename Box<Point_>::value_type result = 1;
+        for (std::size_t i = 0; i < Point_::size(); ++i) {
+            result *= abs(box.upper[i] - box.lower[i]);
+        }
+        return result;
+    }
+
+    template<class Point_>
     constexpr bool
-    intersects (const Box<Repr_, Size_>& lhs, const Box<Repr_, Size_>& rhs)
-    {
-        for (std::size_t dim = 0; dim < Size_; ++dim)
-        {
+    intersects (const Box <Point_>& lhs, const Box <Point_>& rhs) {
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             const bool gap_exists = lhs.upper[dim] < rhs.lower[dim] ||
                                     rhs.upper[dim] < lhs.lower[dim];
 
-            if (gap_exists) return false;
+            if (gap_exists) { return false; }
         }
         return true;
     }
 
-    template<class Repr_, std::size_t Size_>
-    constexpr std::optional<Box<Repr_, Size_>>
-    intersection (const Box<Repr_, Size_>& lhs, const Box<Repr_, Size_>& rhs)
-    {
-        if (!intersects(lhs, rhs))
+    template<class Point_>
+    constexpr std::optional<Box < Point_>>
+
+    intersection (const Box <Point_>& lhs, const Box <Point_>& rhs) {
+        if (!intersects(lhs, rhs)) {
             return std::nullopt;
+        }
 
-        Point<Repr_, Size_> lower;
-        Point<Repr_, Size_> upper;
+        Point_ lower{};
+        Point_ upper{};
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             lower[dim] = std::max(lhs.lower[dim], rhs.lower[dim]);
+        }
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             upper[dim] = std::min(lhs.upper[dim], rhs.upper[dim]);
+        }
 
-        return Box<Repr_, Size_>(lower, upper);
+        return Box<Point_>(lower, upper);
     }
 
-    template<class Repr_, std::size_t Size_>
-    constexpr Box<Repr_, Size_>
-    join (const Box<Repr_, Size_>& lhs, const Box<Repr_, Size_>& rhs)
-    {
-        Point<Repr_, Size_> lower;
-        Point<Repr_, Size_> upper;
+    template<class Point_>
+    constexpr Box <Point_>
+    join (const Box <Point_>& lhs, const Box <Point_>& rhs) {
+        Point_ lower{};
+        Point_ upper{};
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             lower[dim] = std::min(lhs.lower[dim], rhs.lower[dim]);
+        }
 
-        for (std::size_t dim = 0; dim < Size_; ++dim)
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
             upper[dim] = std::max(lhs.upper[dim], rhs.upper[dim]);
+        }
 
-        return Box<Repr_, Size_>(lower, upper);
+        return Box<Point_>(lower, upper);
+    }
+
+    template<class Point_>
+    constexpr typename Box<Point_>::value_type
+    join_enlargement (const Box <Point_>& base, const Box <Point_>& ext) {
+        typename Box<Point_>::value_type cost{};
+
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
+            cost = cost +
+                   std::max((base.lower[dim] - base.lower[dim]), base.lower[dim] - ext.lower[dim]);
+        }
+
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
+            cost = cost +
+                   std::max((ext.upper[dim] - ext.upper[dim]), ext.upper[dim] - base.upper[dim]);
+        }
+
+        return cost;
     }
 
 
-    namespace tests
-    {
-        void box_intersection_tests ()
-        {
+    template<class Repr_, std::size_t Size_, class Res_ = double>
+    constexpr Res_
+    sq_distance (
+        const Point <Repr_, Size_>& lhs, const Point <Repr_, Size_>& rhs) {
+        Res_ result{};
+        for (size_t i = 0; i < Size_; ++i) {
+            result = result + (lhs[i] - rhs[i]) * (lhs[i] - rhs[i]);
+        }
+        return result;
+    }
+
+    template<class Repr_, std::size_t Size_, class Res_ = double>
+    constexpr Res_
+    distance (
+        const Point <Repr_, Size_>& lhs, const Point <Repr_, Size_>& rhs) {
+        return std::sqrt(sq_distance(lhs, rhs));
+    }
+
+    template<class Point_, class Res_ = double>
+    constexpr Res_
+    min_sq_distance (const Box <Point_>& lhs, const Box <Point_>& rhs) {
+        using value = typename Point_::value_type;
+        Point_ temporary{};
+
+        for (std::size_t dim = 0; dim < Point_::size(); ++dim) {
+            const bool gap_exists = lhs.upper[dim] < rhs.lower[dim] ||
+                                    rhs.upper[dim] < lhs.lower[dim];
+
+            if (!gap_exists) { continue; }
+
+            temporary[dim] = std::max(
+                std::max(value{}, rhs.lower[dim] - lhs.upper[dim]),
+                std::max(value{}, lhs.lower[dim] - rhs.upper[dim]));
+        }
+        return sq_distance(temporary, Point_{});
+    }
+
+    namespace tests {
+#ifdef GEOMETRY_COMPILE_TESTS
+        void box_intersection_tests () {
             constexpr Point<int, 3> p1 = { 0, 1, 2 };
             constexpr Point<int, 3> p2 = { 1, 2, 3 };
             constexpr Point<int, 3> p3 = { 2, 3, 4 };
             constexpr Point<int, 3> p4 = { 3, 4, 5 };
 
-            constexpr Box<int, 3> b12(p1, p2);
-            constexpr Box<int, 3> b13(p1, p3);
-            constexpr Box<int, 3> b14(p1, p4);
-            constexpr Box<int, 3> b23(p2, p3);
-            constexpr Box<int, 3> b24(p2, p4);
-            constexpr Box<int, 3> b34(p3, p4);
+            constexpr Box b12(p1, p2);
+            constexpr Box b13(p1, p3);
+            constexpr Box b14(p1, p4);
+            constexpr Box b23(p2, p3);
+            constexpr Box b24(p2, p4);
+            constexpr Box b34(p3, p4);
 
-            constexpr Box<int, 3> b11(p1, p1);
-            constexpr Box<int, 3> b22(p2, p2);
-            constexpr Box<int, 3> b33(p3, p3);
-            constexpr Box<int, 3> b44(p4, p4);
+            constexpr Box b11(p1, p1);
+            constexpr Box b22(p2, p2);
+            constexpr Box b33(p3, p3);
+            constexpr Box b44(p4, p4);
 
             static_assert(!intersects(b12, b34), "Test no intersect");
             static_assert(!intersects(b34, b12), "Test no intersect");
@@ -115,24 +183,23 @@ namespace geom
             static_assert(*intersection(b34, b34) == b34, "Test self");
         }
 
-        void box_join_tests ()
-        {
+        void box_join_tests () {
             constexpr Point<int, 3> p1 = { 0, 1, 2 };
             constexpr Point<int, 3> p2 = { 1, 2, 3 };
             constexpr Point<int, 3> p3 = { 2, 3, 4 };
             constexpr Point<int, 3> p4 = { 3, 4, 5 };
 
-            constexpr Box<int, 3> b12(p1, p2);
-            constexpr Box<int, 3> b13(p1, p3);
-            constexpr Box<int, 3> b14(p1, p4);
-            constexpr Box<int, 3> b23(p2, p3);
-            constexpr Box<int, 3> b24(p2, p4);
-            constexpr Box<int, 3> b34(p3, p4);
+            constexpr Box b12(p1, p2);
+            constexpr Box b13(p1, p3);
+            constexpr Box b14(p1, p4);
+            constexpr Box b23(p2, p3);
+            constexpr Box b24(p2, p4);
+            constexpr Box b34(p3, p4);
 
-            constexpr Box<int, 3> b11(p1, p1);
-            constexpr Box<int, 3> b22(p2, p2);
-            constexpr Box<int, 3> b33(p3, p3);
-            constexpr Box<int, 3> b44(p4, p4);
+            constexpr Box b11(p1, p1);
+            constexpr Box b22(p2, p2);
+            constexpr Box b33(p3, p3);
+            constexpr Box b44(p4, p4);
 
             static_assert(join(b11, b22) == b12, "Join points");
             static_assert(join(b11, b33) == b13, "Join points");
@@ -151,6 +218,7 @@ namespace geom
             static_assert(join(b14, b12) == b14, "Join included");
             static_assert(join(b13, b12) == b13, "Join included");
         }
+#endif
     }
 }
 

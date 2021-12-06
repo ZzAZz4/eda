@@ -3,26 +3,25 @@
 
 #include "point.hpp"
 
-namespace geom
-{
-    template<class Repr_, std::size_t Size_>
-    struct Box
-    {
-        using point_type = Point<Repr_, Size_>;
+namespace geom {
+    template<class Point_>
+    struct Box {
+        using point_type = Point_;
         using size_type [[maybe_unused]] = typename point_type::size_type;
         using value_type [[maybe_unused]] = typename point_type::value_type;
 
-        /* const so that nobody does something stupid with the ring */
         /* lower point on the box on all dimensions */
-        const point_type lower;
+        point_type lower;
 
         /* upper point on the box on all dimensions */
-        const point_type upper;
+        point_type upper;
 
         /* Constructor.
          * Creates a bbox that encloses both lower and upper,
          * regardless of order on each dimension */
-        constexpr Box (point_type lower_, point_type upper_);
+        constexpr explicit Box (
+            Box::point_type lower_ = Box::point_type{},
+            Box::point_type upper_ = Box::point_type{});
 
         /* Comparison */
         constexpr bool operator == (const Box& other) const;
