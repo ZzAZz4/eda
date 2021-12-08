@@ -1,5 +1,6 @@
 #include "../index/rtree.hpp"
 #include "./csv-parser/csv.hpp"
+#include "./csv-parser/rapidcsv.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -36,7 +37,7 @@ files_in_folder (const fs::path& path) {
 }
 
 template<class Vec>
-Vec try_fetch_locations (const fs::path& path, bool variable_cols);
+Vec try_fetch_locations (const fs::path& path);
 
 /* CSV STRUCTURE */
 
@@ -61,27 +62,32 @@ fetch_locations (const fs::path& folder) {
 
     for (const fs::path& entry : vec) {
         Vec temp;
-        try {
-            temp = try_fetch_locations<Vec>(entry, true);
-        } catch (std::runtime_error&) {
-            temp = try_fetch_locations<Vec>(entry, false);
-        }
+        // try {
+        temp = try_fetch_locations<Vec>(entry);
+   
+        // } catch (std::runtime_error&) {
+            // temp = try_fetch_locations<Vec>(entry, false);
+        // }
         std::copy(temp.begin(), temp.end(), std::back_inserter(res));
     }
     return res;
 }
 
 template<class Vec>
-Vec try_fetch_locations (const fs::path& path, bool variable_cols) {
+Vec try_fetch_locations (const fs::path& path) {
     Vec res;
     auto out = std::back_inserter(res);
 
-    CSVFormat format;
-    format.header_row(0);
-    format.delimiter(',');
-    format.variable_columns(variable_cols);
+    // CSVFormat format;
+    // format.header_row(0);
+    // format.delimiter(',');
+    // format.variable_columns(variable_cols);
 
-    CSVReader reader(path.u8string(), format);
+    // CSVReader reader(path.u8string(), format);
+
+    rapidcsv::Document doc(path.u8string());
+    std::cout << "Read " << doc.GetRowCount() << " values." << std::endl;
+
     std::string file = path.filename().string();
 
     std::string pickup_label = file[0] == 'g' ? "lpep_pickup_datetime" : "tpep_pickup_datetime";
@@ -90,13 +96,19 @@ Vec try_fetch_locations (const fs::path& path, bool variable_cols) {
 
     std::cout << "File: " << file << std::endl;
 
-    for (const auto& row : reader) {
-        auto node_name = row[pickup_label].get<std::string>();
-        auto lat = row[plat_label].get<double>();
-        auto lon = row[plon_label].get<double>();
+    // for (const auto& row : reader) {
+        // auto node_name = row[pickup_label].get<std::string>(); doc.GetCell<std::string>(pickup_label,i)
+        // auto lat = row[plat_label].get<double>(); doc.GetCell<double>(plat_label,i)
+        // auto lon = row[plon_label].get<double>(); doc.GetCell<double>(plon_label,i)
 
+    for (long unsigned int i = 0; i < doc.GetRowCount(); ++i){
+        auto node_name = doc.GetCell<std::string>(pickup_label,i);
+        auto lat = doc.GetCell<double>(plat_label,i);
+        auto lon = doc.GetCell<double>(plon_label,i);
         std::pair<point_type, std::string> record{{ lat, lon }, node_name };
         *out++ = record;
+        // std::cout << doc.GetCell<std::string>(pickup_label,i) << ", " << doc.GetCell<std::string>(plat_label,i) << ", " << doc.GetCell<std::string>(plon_label,i) << "\n";
     }
+    // doc.Clear();
     return res;
 }

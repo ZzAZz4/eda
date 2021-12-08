@@ -38,7 +38,7 @@ create_index (const std::string& path) {
 }
 
 int main () {
-    index_type tree = create_index("../2015-data/j8/");
+    index_type tree = create_index("../2015-data/data/");
     std::vector<std::string> result;
     box_type box{{-73.937530517578125,40.804500579833984}, {-73.937530517578125,40.804500579833984}};
     tree.query(box, std::back_inserter(result));
