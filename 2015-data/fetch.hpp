@@ -98,11 +98,16 @@ Vec try_fetch_locations (const fs::path& path, index_type& tree) {
     std::string pickup_label = file[0] == 'g' ? "lpep_pickup_datetime" : "tpep_pickup_datetime";
     std::string plon_label = file[0] == 'g' ? "Pickup_longitude" : "pickup_longitude";
     std::string plat_label = file[0] == 'g' ? "Pickup_latitude" : "pickup_latitude";
+    
 
     in.read_header(io::ignore_extra_column, pickup_label, plon_label, plat_label);
     if (file[0] == 'g'){
-        in.col_order.push_back(-1);
-        in.col_order.push_back(-1);
+        std::string a = std::string(1,file[20]);
+        std::string b  = std::string(1,file[21]);
+        if (std::stoi(a+b) < 7){
+            in.col_order.push_back(-1);
+            in.col_order.push_back(-1);
+        }
     }
     std::cout << "File: " << file << std::endl;
 
