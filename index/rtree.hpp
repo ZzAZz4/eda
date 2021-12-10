@@ -5,7 +5,7 @@
 #include "rtree_node.hpp"
 #include "../geometry/ops.hpp"
 
-namespace index {
+namespace index_ {
     namespace detail {
         template<size_t M_, class BoxPair>
         static size_t
@@ -49,7 +49,7 @@ namespace index {
     }
 }
 
-namespace index {
+namespace index_ {
     template<class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2>
     struct RTree {
     public:

@@ -7,6 +7,10 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 add_executable(eda main.cpp)
 
+if(CMAKE_COMPILER_IS_GNUCC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread")
+endif(CMAKE_COMPILER_IS_GNUCC)
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(eda PRIVATE Threads::Threads stdc++fs)

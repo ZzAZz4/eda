@@ -6,7 +6,7 @@
 #include "../geometry/box.hpp"
 
 
-namespace index::detail {
+namespace index_::detail {
     template<class Record_, class Box_, std::size_t M_, std::size_t m_>
     struct RTreeBase;
 

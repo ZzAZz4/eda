@@ -527,9 +527,12 @@ namespace rapidcsv
      */
     void Clear()
     {
-      mData.clear();
-      mColumnNames.clear();
-      mRowNames.clear();
+      mData = std::vector<std::vector<std::string>>();
+      mColumnNames = std::map<std::string, size_t>();
+      mRowNames = std::map<std::string, size_t>();
+      // mData.clear();
+      // mColumnNames.clear();
+      // mRowNames.clear();
 #ifdef HAS_CODECVT
       mIsUtf16 = false;
       mIsLE = false;
