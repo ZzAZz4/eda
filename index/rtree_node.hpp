@@ -23,8 +23,8 @@ namespace index_::detail {
         using inner_type = RTreeInner<Record_, Box_, M_, m_>;
         
         // aid in debugging
-        // inner_type* inner = (inner_type*)(this);
-        // leaf_type* leaf = (leaf_type*)(this);
+        inner_type* inner = (inner_type*)(this);
+        leaf_type* leaf = (leaf_type*)(this);
 
         using box_type = Box_;
         using point_type = typename box_type::point_type;
@@ -45,6 +45,7 @@ namespace index_::detail {
             for (size_t i = 0; i < size; ++i) {
                 auto* cur_box = reinterpret_cast<box_type*>((&_boxes[i]));
                 cur_box->~box_type();
+                cur_box = nullptr;
             }
             if (is_leaf) ((leaf_type*)(this))->cleanup();
             else ((inner_type*)(this))->cleanup();
@@ -95,6 +96,7 @@ namespace index_::detail {
         void cleanup() {
             for (size_t i = 0; i < this->size; ++i) {
                 auto* cur_ch = reinterpret_cast<record_type>(_records[i]);
+                cur_ch = nullptr;
                 delete cur_ch;
             }
         }
