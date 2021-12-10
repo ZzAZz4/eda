@@ -2,10 +2,10 @@
 // #include "./csv-parser/csv.hpp"
 // #include "./csv-parser/rapidcsv.h"
 #include "./csv-parser/fast.h"
-// #include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
 
 // using namespace csv;
 
@@ -61,6 +61,9 @@ Vec
 fetch_locations (const fs::path& folder, index_type& tree) {
     std::vector<fs::path> vec = files_in_folder(folder);
     Vec res;
+    
+    // benchmarking
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
     for (const fs::path& entry : vec) {
         Vec temp;
@@ -72,6 +75,10 @@ fetch_locations (const fs::path& folder, index_type& tree) {
         // }
         std::copy(temp.begin(), temp.end(), std::back_inserter(res));
     }
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+    std::cout << "Records inserted in " << time_span.count() << " seconds." << std::endl;
     return res;
 }
 
