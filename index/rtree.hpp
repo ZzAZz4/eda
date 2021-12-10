@@ -26,12 +26,14 @@ namespace index_ {
         template<class Box, class Node, class Record = typename Node::record_type>
         static bool
         _try_construct_at (Node* node, const Box& box, const Record& record) {
+            assert(node->size <= node->capacity);
             if (node->size == node->capacity) {
                 return false;
             }
             node->_boxes[node->size] = box;
             node->_records[node->size] = record;
             node->size++;
+            assert(node->size <= node->capacity);
             return true;
         }
 
@@ -238,6 +240,7 @@ namespace index_ {
 
             // Distribute records into result.
             _distribute_groups<Node>(records, result);
+            assert(result.left.node->size + result.right.node->size == M_ + 1);
             return result;
         }
 
