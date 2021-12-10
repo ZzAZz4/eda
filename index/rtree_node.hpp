@@ -23,8 +23,8 @@ namespace index_::detail {
         using inner_type = RTreeInner<Record_, Box_, M_, m_>;
         
         // aid in debugging
-        inner_type* inner = (inner_type*)(this);
-        leaf_type* leaf = (leaf_type*)(this);
+        // inner_type* inner = (inner_type*)(this);
+        // leaf_type* leaf = (leaf_type*)(this);
 
         using box_type = Box_;
         using point_type = typename box_type::point_type;
