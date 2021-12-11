@@ -25,8 +25,8 @@ namespace index_::detail
         using inner_type = RTreeInner<Record_, Box_, M_, m_>;
 
         // aid in debugging
-        // inner_type* inner = (inner_type*)(this);
-        // leaf_type* leaf = (leaf_type*)(this);
+        inner_type* inner = (inner_type*)(this);
+        leaf_type* leaf = (leaf_type*)(this);
 
         inline static int count = 0;
 
@@ -42,14 +42,15 @@ namespace index_::detail
         size_type size = 0;
         box_storage _boxes[capacity];
 
-        explicit RTreeBase(bool is_leaf) : is_leaf(is_leaf) {
-            count++;
+        ~RTreeBase () {
+            for (size_t i = 0; i < size; ++i) {
+                auto* cur_box = reinterpret_cast<box_type*>((&_boxes[i]));
+                cur_box->~box_type();
+                cur_box = nullptr;
+            }
+            if (is_leaf) ((leaf_type*)(this))->cleanup();
+            else ((inner_type*)(this))->cleanup();
         }
-
-        virtual ~RTreeBase() {
-            assert(this->size <= this->capacity);
-            std::cout << (count--) << '\n';
-        };
     };
 
     template <class Record_, class Box_, std::size_t M_, std::size_t m_>
@@ -93,10 +94,11 @@ namespace index_::detail
 
         RTreeInner() : base_type(false) {}
 
-        ~RTreeInner() {
-            assert(this->size <= this->capacity);
-            for (std::size_t i = 0; i < this->size; ++i) {
-                delete _records[i];
+        void cleanup() {
+            for (size_t i = 0; i < this->size; ++i) {
+                auto* cur_ch = reinterpret_cast<record_type>(_records[i]);
+                cur_ch = nullptr;
+                delete cur_ch;
             }
         }
     };

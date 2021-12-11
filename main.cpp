@@ -10,7 +10,6 @@ using box_type = geom::Box<point_type>;
 using index_type = index_::RTree<std::string, box_type, 16384>;
 
 #include "2015-data/fetch.hpp"
-// #include "./2015-data/csv-parser/fast.h"
 
 index_type
 create_index (const std::string& path) {

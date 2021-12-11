@@ -2,6 +2,8 @@
 #define EDA_RTREE_HPP
 
 #include <iostream>
+#include <thread>
+#include <functional>
 #include "rtree_node.hpp"
 #include "../geometry/ops.hpp"
 
@@ -89,7 +91,41 @@ namespace index_ {
     public:
         node_pointer root = nullptr;
 
-        ~RTree () { delete root; }
+        ~RTree () { 
+            unsigned int n = std::thread::hardware_concurrency();
+            size_t t = M_;
+            while ( t > 0 ){                
+                size_t s = n;
+                if (t < n)
+                    s = t;
+
+                std::vector<std::thread> vecOfThreads;
+            
+                for (size_t i = 0; i < s; ++i){
+                    node_pointer x = ((inner_node*)(root))->_records[i];
+                    vecOfThreads.push_back(std::thread([x](){
+                        delete x;
+                    }));
+                }
+
+                for (std::thread & th : vecOfThreads){
+                    if (th.joinable())
+                        th.join();
+                }
+
+                t -= s;
+            }
+
+            for (size_t i = 0; i < M_; ++i) {
+                auto* cur_box = reinterpret_cast<box_type*>((&(root->_boxes)[i]));
+                cur_box->~box_type();
+            }
+
+            for ( auto a : (((inner_node*)(root))->_records) ){
+                delete a;
+            }
+            root = nullptr;
+        }
 
         /* Inserts a box-record pair in the tree
          * Returns true if successful (it should always be successful tho...)
