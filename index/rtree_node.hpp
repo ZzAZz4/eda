@@ -42,6 +42,8 @@ namespace index_::detail
         size_type size = 0;
         box_storage _boxes[capacity];
 
+        RTreeBase(bool leaf) : is_leaf(leaf) {}
+
         ~RTreeBase () {
             for (size_t i = 0; i < size; ++i) {
                 auto* cur_box = reinterpret_cast<box_type*>((&_boxes[i]));
@@ -73,6 +75,10 @@ namespace index_::detail
 
         ~RTreeLeaf() {
             assert(this->size <= this->capacity);
+        }
+
+        void cleanup() {
+
         }
     };
 

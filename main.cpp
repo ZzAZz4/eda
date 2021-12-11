@@ -16,7 +16,7 @@ create_index (const std::string& path) {
     using Vec = std::vector<std::pair<point_type, std::string>>;
     index_type tree;
 
-    Vec records = fetch_locations<Vec,index_type>(path,tree);
+    fetch_locations<Vec,index_type>(path,tree);
     return tree;
 }
 
