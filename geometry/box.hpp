@@ -28,6 +28,8 @@ namespace geom {
 
         /* Comparison */
         constexpr bool operator != (const Box& other) const;
+
+        /**/
     };
 }
 

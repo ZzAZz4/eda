@@ -2,10 +2,12 @@
 #define EDA_RTREE_HPP
 
 #include <iostream>
+#include <thread>
+#include <functional>
 #include "rtree_node.hpp"
 #include "../geometry/ops.hpp"
 
-namespace index {
+namespace index_ {
     namespace detail {
         template<size_t M_, class BoxPair>
         static size_t
@@ -49,7 +51,7 @@ namespace index {
     }
 }
 
-namespace index {
+namespace index_ {
     template<class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2>
     struct RTree {
     public:
@@ -87,15 +89,54 @@ namespace index {
     public:
         node_pointer root = nullptr;
 
-        ~RTree () { delete root; }
+        ~RTree () { 
+            if (root->is_leaf){
+                delete root;
+                return;
+            }
+            unsigned int n = std::thread::hardware_concurrency();
+            size_t t = M_;
+            size_t cnt = 0;
+            while ( t > 0 ){                
+                size_t s = n;
+                if (t < n)
+                    s = t;
+
+                std::vector<std::thread> vecOfThreads;
+                
+                for (size_t i = cnt; i < (cnt + s); ++i){
+                    node_pointer x = ((inner_node*)(root))->_records[i];
+                    vecOfThreads.push_back(std::thread([x](){
+                        delete x;
+                    }));
+                }
+
+                for (std::thread & th : vecOfThreads){
+                    if (th.joinable())
+                        th.join();
+                }
+                cnt += s;
+                t -= s;
+            }
+
+            for (size_t i = 0; i < M_; ++i) {
+                auto* cur_box = reinterpret_cast<box_type*>((&(root->_boxes)[i]));
+                cur_box->~box_type();
+            }
+
+            for ( auto a : (((inner_node*)(root))->_records) ){
+                delete a;
+            }
+            
+            root = nullptr;            
+        }
 
         /* Inserts a box-record pair in the tree
          * Returns true if successful (it should always be successful tho...)
          * Usage:
          * >> Box
          * >> insert(*/
-        bool
-        insert (const box_type& box, const record_type& record) {
+        bool insert (const box_type& box, const record_type& record) {
             if (!root) { // create a root node as a leaf with a single entry
                 auto node = new leaf_node;
                 root = static_cast<node_pointer>(node);

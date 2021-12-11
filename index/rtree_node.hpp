@@ -6,7 +6,7 @@
 #include "../geometry/box.hpp"
 
 
-namespace index::detail {
+namespace index_::detail {
     template<class Record_, class Box_, std::size_t M_, std::size_t m_>
     struct RTreeBase;
 
@@ -45,6 +45,7 @@ namespace index::detail {
             for (size_t i = 0; i < size; ++i) {
                 auto* cur_box = reinterpret_cast<box_type*>((&_boxes[i]));
                 cur_box->~box_type();
+                cur_box = nullptr;
             }
             if (is_leaf) ((leaf_type*)(this))->cleanup();
             else ((inner_type*)(this))->cleanup();
@@ -95,6 +96,7 @@ namespace index::detail {
         void cleanup() {
             for (size_t i = 0; i < this->size; ++i) {
                 auto* cur_ch = reinterpret_cast<record_type>(_records[i]);
+                cur_ch = nullptr;
                 delete cur_ch;
             }
         }

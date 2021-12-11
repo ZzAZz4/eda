@@ -1,10 +1,13 @@
 #include "../index/rtree.hpp"
-#include "./csv-parser/csv.hpp"
+// #include "./csv-parser/csv.hpp"
+// #include "./csv-parser/rapidcsv.h"
+#include "./csv-parser/fast.h"
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
 
-using namespace csv;
+// using namespace csv;
 
 // (there are fancier ways to do this automatically with 
 // preprocessor directives but for now this will do)
@@ -35,8 +38,8 @@ files_in_folder (const fs::path& path) {
     return fileNamePaths;
 }
 
-template<class Vec>
-Vec try_fetch_locations (const fs::path& path, bool variable_cols);
+template<class Vec, typename index_type>
+Vec try_fetch_locations (const fs::path& path, index_type& tree);
 
 /* CSV STRUCTURE */
 
@@ -53,50 +56,60 @@ Vec try_fetch_locations (const fs::path& path, bool variable_cols);
 // After insertion is implemented: Receives a 2d rtree storing std::string records,
 // inserting the (lat, long) -> date&time data obtained from parsing the csv files.
 
-template<class Vec>
+template<class Vec, typename index_type>
 Vec
-fetch_locations (const fs::path& folder) {
+fetch_locations (const fs::path& folder, index_type& tree) {
     std::vector<fs::path> vec = files_in_folder(folder);
     Vec res;
+    
+    // benchmarking
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
     for (const fs::path& entry : vec) {
         Vec temp;
-        try {
-            temp = try_fetch_locations<Vec>(entry, true);
-        } catch (std::runtime_error&) {
-            temp = try_fetch_locations<Vec>(entry, false);
-        }
-        std::copy(temp.begin(), temp.end(), std::back_inserter(res));
+        temp = try_fetch_locations<Vec,index_type>(entry,tree);
     }
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+    std::cout << "Records inserted in " << time_span.count() << " seconds." << std::endl;
     return res;
 }
 
-template<class Vec>
-Vec try_fetch_locations (const fs::path& path, bool variable_cols) {
+template<class Vec, typename index_type>
+Vec try_fetch_locations (const fs::path& path, index_type& tree) {
     Vec res;
-    auto out = std::back_inserter(res);
 
-    CSVFormat format;
-    format.header_row(0);
-    format.delimiter(',');
-    format.variable_columns(variable_cols);
-
-    CSVReader reader(path.u8string(), format);
+    io::CSVReader<3,io::trim_chars<>, io::no_quote_escape<','>> in(path.u8string());
     std::string file = path.filename().string();
 
     std::string pickup_label = file[0] == 'g' ? "lpep_pickup_datetime" : "tpep_pickup_datetime";
     std::string plon_label = file[0] == 'g' ? "Pickup_longitude" : "pickup_longitude";
     std::string plat_label = file[0] == 'g' ? "Pickup_latitude" : "pickup_latitude";
+    
 
-    std::cout << "File: " << file << std::endl;
-
-    for (const auto& row : reader) {
-        auto node_name = row[pickup_label].get<std::string>();
-        auto lat = row[plat_label].get<double>();
-        auto lon = row[plon_label].get<double>();
-
-        std::pair<point_type, std::string> record{{ lat, lon }, node_name };
-        *out++ = record;
+    in.read_header(io::ignore_extra_column, pickup_label, plon_label, plat_label);
+    if (file[0] == 'g'){
+        std::string a = std::string(1,file[20]);
+        std::string b  = std::string(1,file[21]);
+        if (std::stoi(a+b) < 7){
+            in.col_order.push_back(-1);
+            in.col_order.push_back(-1);
+        }
     }
+    std::cout << "File: " << file << std::endl;
+    
+    std::string node_name; float lon; float lat;
+    int bad_row = 0;
+
+    while(in.read_row(node_name, lon, lat)){
+        if ( lon == 0 || lat == 0)
+            bad_row++;
+        else{
+            auto box = box_type({ lon, lat }, { lon, lat });
+            tree.insert(box, node_name);
+        }
+    }
+    std::cout << bad_row << " incomplete rows" << std::endl;
     return res;
 }
