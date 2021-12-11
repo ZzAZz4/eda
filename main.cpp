@@ -14,30 +14,9 @@ using index_type = index_::RTree<std::string, box_type, 9>;
 index_type
 create_index (const std::string& path) {
     using Vec = std::vector<std::pair<point_type, std::string>>;
-    // Vec records = fetch_locations<Vec>(path);
     index_type tree;
 
     Vec records = fetch_locations<Vec,index_type>(path,tree);
-    // std::multiset<std::string> mock;
-
-
-    // int i = 0;
-    // for (const auto&[point, name] : records) {
-    //     auto box = box_type({ point[1], point[0] }, { point[1], point[0] });
-    //     tree.insert(box, name);
-    //     mock.insert(name);
-    //     i++;
-    //     if (i % 65536 == 0) {
-    //         std::cout << i << std::endl;
-    //     }
-    // }
-
-    // std::multiset<std::string> should_be;
-    // tree.get_all(std::inserter(should_be, should_be.end()));
-
-    // std::cout << should_be.size() << ' ' << records.size() << '\n';
-    // assert(should_be.size() == records.size());
-    // assert(mock == should_be);
     return tree;
 }
 
@@ -49,5 +28,6 @@ int main () {
     for (const auto& i : result) {
         std::cout << i << '\n';
     }
+    std::cout << "excecution finished" << '\n';
     return 0;
 }

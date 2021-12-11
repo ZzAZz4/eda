@@ -90,16 +90,21 @@ namespace index_ {
         node_pointer root = nullptr;
 
         ~RTree () { 
+            if (root->is_leaf){
+                delete root;
+                return;
+            }
             unsigned int n = std::thread::hardware_concurrency();
             size_t t = M_;
+            size_t cnt = 0;
             while ( t > 0 ){                
                 size_t s = n;
                 if (t < n)
-                    s = t
+                    s = t;
 
                 std::vector<std::thread> vecOfThreads;
-            
-                for (size_t i = 0; i < s; ++i){
+                
+                for (size_t i = cnt; i < (cnt + s); ++i){
                     node_pointer x = ((inner_node*)(root))->_records[i];
                     vecOfThreads.push_back(std::thread([x](){
                         delete x;
@@ -110,7 +115,7 @@ namespace index_ {
                     if (th.joinable())
                         th.join();
                 }
-
+                cnt += s;
                 t -= s;
             }
 
@@ -122,6 +127,7 @@ namespace index_ {
             for ( auto a : (((inner_node*)(root))->_records) ){
                 delete a;
             }
+            
             root = nullptr;            
         }
 
@@ -130,8 +136,7 @@ namespace index_ {
          * Usage:
          * >> Box
          * >> insert(*/
-        bool
-        insert (const box_type& box, const record_type& record) {
+        bool insert (const box_type& box, const record_type& record) {
             if (!root) { // create a root node as a leaf with a single entry
                 auto node = new leaf_node;
                 root = static_cast<node_pointer>(node);

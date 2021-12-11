@@ -67,13 +67,7 @@ fetch_locations (const fs::path& folder, index_type& tree) {
 
     for (const fs::path& entry : vec) {
         Vec temp;
-        // try {
         temp = try_fetch_locations<Vec,index_type>(entry,tree);
-   
-        // } catch (std::runtime_error&) {
-            // temp = try_fetch_locations<Vec>(entry, false);
-        // }
-        std::copy(temp.begin(), temp.end(), std::back_inserter(res));
     }
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
@@ -85,12 +79,6 @@ fetch_locations (const fs::path& folder, index_type& tree) {
 template<class Vec, typename index_type>
 Vec try_fetch_locations (const fs::path& path, index_type& tree) {
     Vec res;
-    // auto out = std::back_inserter(res);
-    // CSVFormat format;
-    // format.header_row(0);
-    // format.delimiter(',');
-    // format.variable_columns(variable_cols);
-    // CSVReader reader(path.u8string(), format);
 
     io::CSVReader<3,io::trim_chars<>, io::no_quote_escape<','>> in(path.u8string());
     std::string file = path.filename().string();
@@ -110,11 +98,6 @@ Vec try_fetch_locations (const fs::path& path, index_type& tree) {
         }
     }
     std::cout << "File: " << file << std::endl;
-
-    // for (const auto& row : reader) {
-        // auto node_name = row[pickup_label].get<std::string>(); doc.GetCell<std::string>(pickup_label,i)
-        // auto lat = row[plat_label].get<float>(); doc.GetCell<float>(plat_label,i)
-        // auto lon = row[plon_label].get<float>(); doc.GetCell<float>(plon_label,i)
     
     std::string node_name; float lon; float lat;
     int bad_row = 0;
@@ -126,9 +109,6 @@ Vec try_fetch_locations (const fs::path& path, index_type& tree) {
             auto box = box_type({ lon, lat }, { lon, lat });
             tree.insert(box, node_name);
         }
-
-        // std::pair<point_type, std::string> record{{ lat, lon }, node_name };
-        // *out++ = record;
     }
     std::cout << bad_row << " incomplete rows" << std::endl;
     return res;
