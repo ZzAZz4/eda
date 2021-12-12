@@ -5,20 +5,23 @@
 #include <optional>
 #include "helpers.hpp"
 
-namespace index_::detail {
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
-    RTreeInner<Record_, Box_, M_, m_>::RTreeInner () : base_type(false) {}
+#define TEMPLATE template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+#define NODE RTreeInner<Record_, Box_, M_, m_>
 
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
-    RTreeInner<Record_, Box_, M_, m_>::~RTreeInner () {
+namespace index_::detail {
+    TEMPLATE NODE::
+    RTreeInner () : base_type(false) {}
+
+    TEMPLATE NODE::
+    ~RTreeInner () {
         for (size_t i = 0; i < this->size; ++i) {
             delete this->records[i];
         }
     }
 
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
-    std::optional<typename RTreeInner<Record_, Box_, M_, m_>::split_type>
-    RTreeInner<Record_, Box_, M_, m_>::_insert_helper (const box_type& box, const Record_& record) {
+    TEMPLATE
+    std::optional<typename NODE::split_type>
+    NODE::_insert_helper (const box_type& box, const Record_& record) {
         size_t idx = detail::_min_enlargement_index(this->boxes, this->size, box);
 
         // _insert_helper_dispatch in that entry. This may propagate a split.
@@ -43,9 +46,10 @@ namespace index_::detail {
 
     }
 
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    TEMPLATE
     template<class OutIt>
-    OutIt RTreeInner<Record_, Box_, M_, m_>::_query_helper (const box_type& box, OutIt out) const {
+    OutIt
+    NODE::_query_helper (const box_type& box, OutIt out) const {
         for (size_t i = 0; i < this->size; ++i) {
             if (geom::intersects(box, this->boxes[i])) {
                 out = this->records[i]->_query_helper_dispatch(box, out);
@@ -53,8 +57,10 @@ namespace index_::detail {
         }
         return out;
     }
-
 }
+
+#undef TEMPLATE
+#undef NODE
 
 
 #endif //EDA_RTREE_INNER_IMPL_HPP

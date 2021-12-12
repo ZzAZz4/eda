@@ -9,7 +9,7 @@
 
 namespace index_::detail {
     template<size_t M_, class BoxPair>
-    static size_t
+    size_t
     _farthest_from_source (size_t src, BoxPair (& recs)[M_]) {
         const auto& src_box = recs[src].first;
         std::size_t res_idx = 0;
@@ -26,7 +26,7 @@ namespace index_::detail {
     }
 
     template<class Node, class Base, class Box = typename Node::box_type, class Record = typename Node::record_type>
-    static bool
+    bool
     _try_add (Base* base, const Box& box, const Record& record) {
         Node* node = static_cast<Node*> (base);
         if (node->size == node->capacity) {
@@ -39,7 +39,7 @@ namespace index_::detail {
     }
 
     template<class It, class Box>
-    static size_t
+    size_t
     _min_enlargement_index (It first, size_t size, const Box& box) {
         using geom::join_enlargement;
 
@@ -58,10 +58,11 @@ namespace index_::detail {
     }
 
 
-    template<class Node, class Box = typename Node::box_type, class Record = typename Node::record_type, std::size_t M_ = Node::capacity>
+    template<
+        class Node, class Box = typename Node::box_type,
+        class Record = typename Node::record_type, std::size_t M_ = Node::capacity>
     void
-    _distribute_groups (
-        std::pair<Box, Record> (& entries)[M_ + 1], typename Node::split_type& out) {
+    _distribute (std::pair<Box, Record> (& entries)[M_ + 1], typename Node::split_type& out) {
         using geom::join;
         using geom::join_enlargement;
         using geom::area;
@@ -104,7 +105,9 @@ namespace index_::detail {
         }
     }
 
-    template<class Node, class Box = typename Node::box_type, class Record = typename Node::record_type, std::size_t M_ = Node::capacity>
+    template<
+        class Node, class Box = typename Node::box_type,
+        class Record = typename Node::record_type, std::size_t M_ = Node::capacity>
     typename Node::split_type
     _handle_split_insert (Node* node, const Box& box, const Record& record) {
         std::pair<typename Node::box_type, typename Node::record_type> records[M_ + 1];
@@ -122,10 +125,9 @@ namespace index_::detail {
         typename Node::split_type result{{ records[E1_idx].first, node },
                                          { records[E2_idx].first, new Node }};
 
-        _distribute_groups<Node>(records, result);
+        _distribute<Node>(records, result);
         return result;
     }
-
 }
 
 
