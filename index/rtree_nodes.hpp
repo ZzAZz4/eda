@@ -4,8 +4,7 @@
 namespace index_::detail {
     enum class RTreeTag : uint8_t {
         LEAF = 0,
-        INNER = 1,
-        UNLOADED = 2
+        INNER = 1
     };
 }
 

@@ -14,8 +14,7 @@ namespace index_::detail {
         switch (this->type) {
         case RTreeTag::LEAF: return static_cast<leaf_type*>(this)->_insert_helper(box, record);
         case RTreeTag::INNER: return static_cast<inner_type*>(this)->_insert_helper(box, record);
-        case RTreeTag::UNLOADED: throw "Not implemented";
-        default: throw std::bad_exception();
+        default: std::abort();
         }
     }
 
@@ -26,8 +25,7 @@ namespace index_::detail {
         switch (this->type) {
         case RTreeTag::LEAF: return static_cast<const leaf_type*>(this)->_query_helper(box, out);
         case RTreeTag::INNER: return static_cast<const inner_type*>(this)->_query_helper(box, out);
-        case RTreeTag::UNLOADED: throw "Not implemented";
-        default: throw std::bad_exception();
+        default: std::abort();
         }
     }
 }
