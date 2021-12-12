@@ -53,6 +53,6 @@ namespace index_::detail {
 
 }
 
-#include "impl/rtree_base_impl.hpp"
+#include "rtree_base_impl.hpp"
 
 #endif //EDA_RTREE_BASE_HPP

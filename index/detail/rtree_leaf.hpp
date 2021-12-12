@@ -43,7 +43,7 @@ namespace index_::detail {
     };
 }
 
-#include "impl/rtree_leaf_impl.hpp"
+#include "rtree_leaf_impl.hpp"
 
 
 #endif //EDA_RTREE_LEAF_HPP

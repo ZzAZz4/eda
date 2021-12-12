@@ -43,6 +43,6 @@ namespace index_::detail {
 
 }
 
-#include "impl/rtree_inner_impl.hpp"
+#include "rtree_inner_impl.hpp"
 
 #endif //EDA_RTREE_INNER_HPP
