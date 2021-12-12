@@ -8,10 +8,15 @@
 #include "rtree_nodes.hpp"
 
 namespace index_ {
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2>
+    template <class T>
+    using RegularPtr = T*;
+
+    template<
+        class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2,
+        template<class> class Ptr = RegularPtr>
     struct RTree {
     public:
-        using base_node = detail::RTreeBase<Record_, Box_, M_, m_>;
+        using base_node = detail::RTreeBase<Record_, Box_, M_, m_, Ptr>;
         using leaf_node = typename base_node::leaf_type;
         using inner_node = typename base_node::inner_type;
 
@@ -26,11 +31,8 @@ namespace index_ {
         constexpr static auto max_right_rebuild_size = M_ + 1 - m_;
         static_assert((M_ + 1) == max_left_rebuild_size + max_right_rebuild_size);
 
-        base_node* root = nullptr;
+        Ptr<base_node> root = nullptr;
     public:
-
-        RTree () = default;
-
         ~RTree () { delete root; }
 
         /* Inserts a box-record pair in the tree
@@ -38,7 +40,8 @@ namespace index_ {
         bool
         insert (const box_type& box, const record_type& record) {
             if (!root) {
-                detail::_try_add<leaf_node>((root = new leaf_node), box, record);
+                root = new leaf_node;
+                detail::_try_add<leaf_node>(root, box, record);
                 return true;
             }
             // call recursive function on the root. This may propagate a split

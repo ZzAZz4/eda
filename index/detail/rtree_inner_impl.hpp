@@ -5,8 +5,8 @@
 #include <optional>
 #include "helpers.hpp"
 
-#define TEMPLATE template<class Record_, class Box_, std::size_t M_, std::size_t m_>
-#define NODE RTreeInner<Record_, Box_, M_, m_>
+#define TEMPLATE template<class Record_, class Box_, std::size_t M_, std::size_t m_, template<class> class Ptr>
+#define NODE RTreeInner<Record_, Box_, M_, m_, Ptr>
 
 namespace index_::detail {
     TEMPLATE NODE::
@@ -15,7 +15,7 @@ namespace index_::detail {
     TEMPLATE NODE::
     ~RTreeInner () {
         for (size_t i = 0; i < this->size; ++i) {
-            delete this->records[i];
+            delete records[i];
         }
     }
 

@@ -5,21 +5,21 @@
 #include <optional>
 
 namespace index_::detail {
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_, template<class> class>
     struct RTreeBase;
 
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_, template<class> class>
     struct RTreeLeaf;
 
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_, template<class> class>
     struct RTreeInner;
 
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_, template<class> class Ptr>
     struct RTreeBase {
     public:
         using base_type = RTreeBase;
-        using leaf_type = RTreeLeaf<Record_, Box_, M_, m_>;
-        using inner_type = RTreeInner<Record_, Box_, M_, m_>;
+        using leaf_type = RTreeLeaf<Record_, Box_, M_, m_, Ptr>;
+        using inner_type = RTreeInner<Record_, Box_, M_, m_, Ptr>;
 
         using box_type = Box_;
         using point_type = typename box_type::point_type;
