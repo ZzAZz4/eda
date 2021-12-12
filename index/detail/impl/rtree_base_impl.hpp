@@ -11,21 +11,24 @@ namespace index_::detail {
     TEMPLATE
     std::optional<typename NODE::split_type>
     NODE::_insert_helper_dispatch (const box_type& box, const Record_& record) {
-        if (this->is_leaf) {
-            return static_cast<leaf_type*>(this)->_insert_helper(box, record);
+        switch (this->type) {
+        case RTreeTag::LEAF: return static_cast<leaf_type*>(this)->_insert_helper(box, record);
+        case RTreeTag::INNER: return static_cast<inner_type*>(this)->_insert_helper(box, record);
+        case RTreeTag::UNLOADED: throw "Not implemented";
+        default: throw std::bad_exception();
         }
-        return static_cast<inner_type*>(this)->_insert_helper(box, record);
     }
 
     TEMPLATE
     template<class OutputIter>
     OutputIter
-    NODE::_query_helper_dispatch (
-        const box_type& box, OutputIter out) const {
-        if (this->is_leaf) {
-            return reinterpret_cast<const leaf_type*>(this)->_query_helper(box, out);
+    NODE::_query_helper_dispatch (const box_type& box, OutputIter out) const {
+        switch (this->type) {
+        case RTreeTag::LEAF: return static_cast<const leaf_type*>(this)->_query_helper(box, out);
+        case RTreeTag::INNER: return static_cast<const inner_type*>(this)->_query_helper(box, out);
+        case RTreeTag::UNLOADED: throw "Not implemented";
+        default: throw std::bad_exception();
         }
-        return reinterpret_cast<const inner_type*>(this)->_query_helper(box, out);
     }
 }
 

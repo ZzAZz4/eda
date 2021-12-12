@@ -7,6 +7,7 @@
 namespace index_::detail {
     template<class Record_, class Box_, std::size_t M_, std::size_t m_>
     struct RTreeLeaf : public RTreeBase<Record_, Box_, M_, m_> {
+    public:
         using base_type = RTreeBase<Record_, Box_, M_, m_>;
         using leaf_type = typename base_type::leaf_type;
         using inner_type = typename base_type::inner_type;
@@ -22,10 +23,7 @@ namespace index_::detail {
         using record_storage = record_type;
         using split_type = typename base_type::split_type;
 
-        using base_type::boxes;
-        record_storage records[capacity];
-        using base_type::size;
-
+    public:
         RTreeLeaf ();
 
         ~RTreeLeaf () = default;
@@ -36,6 +34,12 @@ namespace index_::detail {
         template<class OutputIter>
         OutputIter
         _query_helper (const box_type& box, OutputIter out) const;
+
+    public:
+        using base_type::boxes;
+        record_storage records[capacity];
+        using base_type::size;
+
     };
 }
 

@@ -14,7 +14,7 @@
 
 namespace index_::detail {
     TEMPLATE NODE::
-    RTreeLeaf () : base_type(true) {}
+    RTreeLeaf () : base_type(RTreeTag::LEAF) {}
 
     TEMPLATE
     std::optional<typename NODE::split_type>

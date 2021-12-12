@@ -10,7 +10,7 @@
 
 namespace index_::detail {
     TEMPLATE NODE::
-    RTreeInner () : base_type(false) {}
+    RTreeInner () : base_type(RTreeTag::INNER) {}
 
     TEMPLATE NODE::
     ~RTreeInner () {
