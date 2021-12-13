@@ -4,8 +4,8 @@
 #include <index/detail/rtree_base.hpp>
 #include <optional>
 
-#define TEMPLATE template<class Record_, class Box_, std::size_t M_, std::size_t m_, template <class> class Ptr>
-#define NODE RTreeBase<Record_, Box_, M_, m_, Ptr>
+#define TEMPLATE template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+#define NODE RTreeBase<Record_, Box_, M_, m_>
 
 namespace index_::detail {
     TEMPLATE

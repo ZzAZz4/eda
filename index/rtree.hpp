@@ -8,15 +8,10 @@
 #include "rtree_nodes.hpp"
 
 namespace index_ {
-    template <class T>
-    using RegularPtr = T*;
-
-    template<
-        class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2,
-        template<class> class Ptr = RegularPtr>
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_ = (M_ + 1) / 2>
     struct RTree {
     public:
-        using base_node = detail::RTreeBase<Record_, Box_, M_, m_, Ptr>;
+        using base_node = detail::RTreeBase<Record_, Box_, M_, m_>;
         using leaf_node = typename base_node::leaf_type;
         using inner_node = typename base_node::inner_type;
 
@@ -26,12 +21,12 @@ namespace index_ {
 
         constexpr static auto capacity = M_;
 
-    private:
+    public:
         constexpr static auto max_left_rebuild_size = m_;
         constexpr static auto max_right_rebuild_size = M_ + 1 - m_;
         static_assert((M_ + 1) == max_left_rebuild_size + max_right_rebuild_size);
 
-        Ptr<base_node> root = nullptr;
+        base_node* root = nullptr;
     public:
         ~RTree () { delete root; }
 

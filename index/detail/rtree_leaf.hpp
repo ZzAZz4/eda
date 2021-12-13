@@ -5,10 +5,10 @@
 #include "rtree_base.hpp"
 
 namespace index_::detail {
-    template<class Record_, class Box_, std::size_t M_, std::size_t m_, template<class> class Ptr>
-    struct RTreeLeaf : public RTreeBase<Record_, Box_, M_, m_, Ptr> {
+    template<class Record_, class Box_, std::size_t M_, std::size_t m_>
+    struct RTreeLeaf : public RTreeBase<Record_, Box_, M_, m_> {
     public:
-        using base_type = RTreeBase<Record_, Box_, M_, m_, Ptr>;
+        using base_type = RTreeBase<Record_, Box_, M_, m_>;
         using leaf_type = typename base_type::leaf_type;
         using inner_type = typename base_type::inner_type;
 
