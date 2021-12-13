@@ -6,7 +6,7 @@
 
 using point_type = geom::Point<float, 2>;
 using box_type = geom::Box<point_type>;
-using index_type = index_::RTree<std::string, box_type, 3>;
+using index_type = index_::RTree<std::string, box_type, 64>;
 
 void write() {
     std::cout << "Create\n";
