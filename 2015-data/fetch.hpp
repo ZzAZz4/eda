@@ -20,7 +20,7 @@ std::vector<fs::path>
 files_in_folder (const fs::path& path) {
     std::vector<fs::path> fileNamePaths;
     if (!fs::exists(path)) {
-        return fileNamePaths;
+        throw std::runtime_error("ERROR: location does not exist" + path.string());
     }
 
     std::copy(fs::directory_iterator(path), fs::directory_iterator(),
