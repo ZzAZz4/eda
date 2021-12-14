@@ -21,6 +21,8 @@ typedef std::pair<box, std::string> value;
 #include <filesystem>
 namespace fs = std::filesystem;
 
+using t_type = bgi::rtree< value, bgi::quadratic<16> >;
+
 // Outputs a vector of file directories in a select path 
 static std::vector<fs::path>
 files_in_folder_ (const fs::path& path) {
@@ -36,28 +38,26 @@ files_in_folder_ (const fs::path& path) {
     return fileNamePaths;
 }
 
-// create the rtree using default constructor
-bgi::rtree< value, bgi::quadratic<16> > rtree;
 
-void try_fetch_locations_ (const fs::path& path);
+void try_fetch_locations_ (const fs::path& path, t_type& rtree);
 
-bgi::rtree< value, bgi::quadratic<16> > &
-fetch_locations_ (const fs::path& folder) {
+void
+fetch_locations_ (const fs::path& folder, t_type& rtree) {
     std::vector<fs::path> vec = files_in_folder_(folder);
     
     // benchmarking
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
     for (const fs::path& entry : vec) {
-        try_fetch_locations_(entry);
+        try_fetch_locations_(entry,rtree);
     }
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
     std::cout << "Records inserted in " << time_span.count() << " seconds." << std::endl;
-    return rtree;
+    return;
 }
 
-void try_fetch_locations_ (const fs::path& path) {
+void try_fetch_locations_ (const fs::path& path, t_type& rtree) {
 
     io::CSVReader<3,io::trim_chars<>, io::no_quote_escape<','>> in(path.u8string());
     std::string file = path.filename().string();
