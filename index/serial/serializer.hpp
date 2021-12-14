@@ -11,19 +11,27 @@ struct serial::Serializer<index_::detail::RTreeBase<Record_, Box_, M_, m_>*> {
     using leaf = typename base::leaf_type;
     using inner = typename base::inner_type;
 
+    inline static std::size_t written = 0;
+
     template<class Archive>
     static void serialize (const type& node, Archive& ar) {
         Serializer<index_::detail::RTreeTag>::serialize(node->type, ar);
         Serializer<typename base::size_type>::serialize(node->size, ar);
         Serializer<typename base::box_type[base::capacity]>::serialize(node->boxes, ar);
 
+        written++;
+        if (written % 100000 == 0) {
+            std::cout << "serializing... Written: " << written << std::endl;
+            ar.flush();
+        }
+
         switch (node->type) {
         case index_::detail::RTreeTag::LEAF: {
+
             auto cast = static_cast<leaf*>(node);
             for (size_t i = 0; i < node->size; ++i) {
                 Serializer<typename leaf::record_type>::serialize(cast->records[i], ar);
             }
-
             return;
         }
         case index_::detail::RTreeTag::INNER: {

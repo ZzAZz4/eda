@@ -20,6 +20,7 @@ namespace index_ {
         using record_type = Record_;
 
         constexpr static auto capacity = M_;
+        inline static std::size_t created = 0;
 
     public:
         constexpr static auto max_left_rebuild_size = m_;
@@ -34,6 +35,7 @@ namespace index_ {
          * Returns true if successful (it should always be successful tho...) */
         bool
         insert (const box_type& box, const record_type& record) {
+            created++;
             if (!root) {
                 root = new leaf_node;
                 detail::_try_add<leaf_node>(root, box, record);

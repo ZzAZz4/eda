@@ -5,7 +5,7 @@
 #ifndef EDA_RTREE_LEAF_IMPL_HPP
 #define EDA_RTREE_LEAF_IMPL_HPP
 
-#include <index/detail/rtree_leaf.hpp>
+#include "rtree_leaf.hpp"
 #include "helpers.hpp"
 #include <optional>
 

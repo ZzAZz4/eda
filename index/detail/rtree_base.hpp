@@ -34,9 +34,10 @@ namespace index_::detail {
         };
 
     public:
-        explicit RTreeBase (RTreeTag type_) : type(type_) {}
+        inline static std::size_t allocated = 0;
+        explicit RTreeBase (RTreeTag type_) : type(type_) { allocated++; }
 
-        virtual ~RTreeBase () = default;
+        virtual ~RTreeBase () { allocated--; }
 
         std::optional<split_type>
         _insert_helper_dispatch (const box_type& box, const Record_& record);

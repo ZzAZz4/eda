@@ -1,7 +1,7 @@
 #ifndef EDA_RTREE_BASE_IMPL_HPP
 #define EDA_RTREE_BASE_IMPL_HPP
 
-#include <index/detail/rtree_base.hpp>
+#include "rtree_base.hpp"
 #include <optional>
 
 #define TEMPLATE template<class Record_, class Box_, std::size_t M_, std::size_t m_>
