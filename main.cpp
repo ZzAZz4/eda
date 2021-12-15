@@ -37,12 +37,7 @@ void read_index (const std::string& ar_name, const std::string& dat_name, const 
 
     std::cout << "Reloaded" << std::endl;
 
-    std::vector<std::string> res;
-    index.query(box, std::back_inserter(res));
-    for (const auto& i : res) {
-        std::cout << i << '\n';
-    }
-
+    index.query(box, std::ostream_iterator<std::string>(std::cout, "\n"));
     std::cout << "Finished read_index\n";
 }
 
