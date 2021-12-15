@@ -1,10 +1,11 @@
 //#define GEOMETRY_COMPILE_TESTS
 #include <fstream>
-#include <boost/program_options.hpp>
+#include <iterator>
 #include "index/rtree.hpp"
 #include "index/serial/serializer.hpp"
 #include "2015-data/fetch.hpp"
 #include "index/serial/serial_query.hpp"
+
 
 using point_type = geom::Point<float, 2>;
 using box_type = geom::Box<point_type>;
@@ -49,12 +50,7 @@ void just_query (const std::string& ar_name, const std::string& dat_name, const 
     std::ifstream ar(ar_name, std::ios::binary);
     std::ifstream dat(dat_name, std::ios::binary);
 
-    std::vector<std::string> res;
-    index_query<index_type>(ar, dat, box, std::back_inserter(res));
-
-    for (const auto& i : res) {
-        std::cout << i << '\n';
-    }
+    index_query<index_type>(ar, dat, box, std::ostream_iterator<std::string>(std::cout, "\n"));
 }
 
 int main (int argc, char** argv) {
@@ -77,6 +73,7 @@ int main (int argc, char** argv) {
 
     std::cout << "Ingrese p1.x, p1.y y p2.x, p2.y\n";
 //    { -73.9589, 40.7168 }, { -73.9588, 40.7169 }
+//  -73.9589 40.7168 -73.9588 40.7169
     point_type p1, p2;
 
     std::cin >> p1[0] >> p1[1];
