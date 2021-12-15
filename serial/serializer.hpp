@@ -28,9 +28,10 @@ namespace serial {
         template<class Archive>
         static void serialize (const type& val, Archive& ar) {
             Serializer<typename type::size_type>::serialize(val.size(), ar);
-            for (char i : val) {
-                Serializer<char>::serialize(i, ar);
-            }
+            ar.write(val.data(), val.size());
+//            for (char i : val) {
+//                Serializer<char>::serialize(i, ar);
+//            }
         }
 
         template<class Archive>
@@ -38,9 +39,10 @@ namespace serial {
             typename type::size_type size;
             Serializer<typename type::size_type>::recover(size, ar);
             dump.resize(size);
-            for (char& i : dump) {
-                Serializer<char>::recover(i, ar);
-            }
+            ar.read(&dump[0], size);
+//            for (char& i : dump) {
+//                Serializer<char>::recover(i, ar);
+//            }
         }
     };
 }

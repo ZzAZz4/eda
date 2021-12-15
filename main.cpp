@@ -65,8 +65,8 @@ int main () {
 
     box_type testbox({ -73.9589, 40.7168 }, { -73.9588, 40.7169 });
 
-    std::cout << "Test deserialize" << std::endl;
-    read_index(archive_name, dat_name, testbox);
+//    std::cout << "Test deserialize" << std::endl;
+//    read_index(archive_name, dat_name, testbox);
 
     std::cout << "Just query" << std::endl;
     just_query(archive_name, dat_name, testbox);
