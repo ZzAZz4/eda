@@ -1,7 +1,10 @@
-# eda
-literalmente eda
+# R-Tree Implementation | NYC Taxi Database Query
 
-# instrucciones
+# Requerimientos
+```
+libboost
+```
+# Instrucciones
 ```
 git clone https://github.com/ZzAZz4/eda
 git submodule update --init --recursive 
