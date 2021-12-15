@@ -13,7 +13,7 @@ namespace geom {
     area (const Box <Point_>& box) {
         typename Box<Point_>::value_type result = 1;
         for (std::size_t i = 0; i < Point_::size(); ++i) {
-            result *= abs(box.upper[i] - box.lower[i]);
+            result *= std::abs(box.upper[i] - box.lower[i]);
         }
         return result;
     }
