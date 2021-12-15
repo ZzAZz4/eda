@@ -9,55 +9,44 @@ using point_type = geom::Point<float, 2>;
 using box_type = geom::Box<point_type>;
 using index_type = index_::RTree<std::string, box_type, 64>;
 
-void write () {
+void
+compile_to_index (const std::string& path, const std::string& ar_name, const std::string& dat_name) {
     std::cout << "Create\n";
-    index_type index;
-    fetch_locations<index_type>("../2015-data/j8/", index);
-    std::cout << "Created: " << index_type::created << "entries" << std::endl;
-    std::cout << "Inserted: " << index_type::base_node::allocated << "entries" << std::endl;
 
-    std::vector<std::string> res;
-    index.query(
-        box_type(
-            { -73.922592163085938, 40.754528045654297 },
-            { -73.922592163085938, 40.754528045654297 }),
-        std::back_inserter(res));
-    for (const auto& i : res) {
-        std::cout << i << '\n';
-    }
+    index_type index;
+    fetch_locations<index_type>(path, index);
 
     std::cout << "Serialize\n";
-    std::ofstream ar("../tree.bin", std::ios::binary);
-    std::ofstream dat("../tree.dat", std::ios::binary);
+
+    std::ofstream ar(ar_name, std::ios::binary);
+    std::ofstream dat(dat_name, std::ios::binary);
     serial::Serializer<index_type>::serialize(index, ar, dat);
-    std::cout << "Destroy!\n";
+
+    std::cout << "Finished serializing!\n";
 }
 
-void read () {
+void read_index (const std::string& ar_name, const std::string& dat_name, const box_type& box) {
     std::cout << "Reload" << std::endl;
+
     index_type index;
-    std::ifstream ar("../tree.bin", std::ios::binary);
-    std::ifstream dat("../tree.dat", std::ios::binary);
+    std::ifstream ar(ar_name, std::ios::binary);
+    std::ifstream dat(dat_name, std::ios::binary);
     serial::Serializer<index_type>::recover(index, ar, dat);
+
     std::cout << "Reloaded" << std::endl;
 
     std::vector<std::string> res;
-    index.query(
-        box_type(
-            { -73.922592163085938, 40.754528045654297 },
-            { -73.922592163085938, 40.754528045654297 }),
-        std::back_inserter(res));
+    index.query(box, std::back_inserter(res));
     for (const auto& i : res) {
         std::cout << i << '\n';
     }
+
+    std::cout << "Finished read_index\n";
 }
 
-void just_query () {
-    std::cout << "Just query" << std::endl;
-    std::ifstream ar("../tree.bin", std::ios::binary);
-    std::ifstream dat("../tree.dat", std::ios::binary);
-    box_type box(
-        { -73.958816528320312, 40.716823577880859 }, { -73.958816528320312, 40.716823577880859 });
+void just_query (const std::string& ar_name, const std::string& dat_name, const box_type& box) {
+    std::ifstream ar(ar_name, std::ios::binary);
+    std::ifstream dat(dat_name, std::ios::binary);
 
     std::vector<std::string> res;
     index_query<index_type>(ar, dat, box, std::back_inserter(res));
@@ -68,11 +57,17 @@ void just_query () {
 }
 
 int main () {
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(nullptr);
+    std::string path = "../2015-data/data/";
+    std::string archive_name = "../index_storage/tree.idx";
+    std::string dat_name = "../index_storage/tree.dat";
 
-    // write();
-    std::cout << "Allocation check: " << index_type::base_node::allocated << std::endl;
-//    read();
-    just_query();
+    compile_to_index(path, archive_name, dat_name);
+
+    box_type testbox({ -73.9589, 40.7168 }, { -73.9588, 40.7169 });
+
+    std::cout << "Test deserialize" << std::endl;
+    read_index(archive_name, dat_name, testbox);
+
+    std::cout << "Just query" << std::endl;
+    just_query(archive_name, dat_name, testbox);
 }
