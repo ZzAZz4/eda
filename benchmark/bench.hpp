@@ -21,7 +21,7 @@ typedef std::pair<box, std::string> value;
 #include <filesystem>
 namespace fs = std::filesystem;
 
-using t_type = bgi::rtree< value, bgi::quadratic<16> >;
+using t_type = bgi::rtree< value, bgi::linear<9> >;
 
 // Outputs a vector of file directories in a select path 
 static std::vector<fs::path>
