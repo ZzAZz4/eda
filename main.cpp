@@ -1,5 +1,6 @@
 //#define GEOMETRY_COMPILE_TESTS
 #include <fstream>
+#include <boost/program_options.hpp>
 #include "index/rtree.hpp"
 #include "index/serial/serializer.hpp"
 #include "2015-data/fetch.hpp"
@@ -56,14 +57,32 @@ void just_query (const std::string& ar_name, const std::string& dat_name, const 
     }
 }
 
-int main () {
-    std::string path = "../2015-data/data/";
-    std::string archive_name = "../index_storage/tree.idx";
-    std::string dat_name = "../index_storage/tree.dat";
+int main (int argc, char** argv) {
+    if (argc != 3 && argc != 4) {
+        std::cerr << "Usage: program <idx_name> <dat_name> [source-if-build]";
+        return -1;
+    }
+//    return 0;
 
-    compile_to_index(path, archive_name, dat_name);
+//    std::string archive_name = "../index_storage/tree.idx";
+//    std::string dat_name = "../index_storage/tree.dat";
+    std::string archive_name = argv[1];
+    std::string dat_name = argv[2];
 
-    box_type testbox({ -73.9589, 40.7168 }, { -73.9588, 40.7169 });
+
+    if (argc == 4) {
+        std::string path = argv[3];
+        compile_to_index(path, archive_name, dat_name);
+    }
+
+    std::cout << "Ingrese p1.x, p1.y y p2.x, p2.y\n";
+//    { -73.9589, 40.7168 }, { -73.9588, 40.7169 }
+    point_type p1, p2;
+
+    std::cin >> p1[0] >> p1[1];
+    std::cin >> p2[0] >> p2[1];
+
+    box_type testbox(p1, p2);
 
 //    std::cout << "Test deserialize" << std::endl;
 //    read_index(archive_name, dat_name, testbox);
