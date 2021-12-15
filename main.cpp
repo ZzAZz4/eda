@@ -53,13 +53,8 @@ int main (int argc, char** argv) {
         std::cerr << "Usage: program <idx_name> <dat_name> [source-if-build]";
         return -1;
     }
-//    return 0;
-
-//    std::string archive_name = "../index_storage/tree.idx";
-//    std::string dat_name = "../index_storage/tree.dat";
     std::string archive_name = argv[1];
     std::string dat_name = argv[2];
-
 
     if (argc == 4) {
         std::string path = argv[3];
@@ -67,7 +62,6 @@ int main (int argc, char** argv) {
     }
 
     std::cout << "Ingrese p1.x, p1.y y p2.x, p2.y\n";
-//    { -73.9589, 40.7168 }, { -73.9588, 40.7169 }
 //  -73.9589 40.7168 -73.9588 40.7169
     point_type p1, p2;
 
