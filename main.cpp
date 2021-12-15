@@ -1,10 +1,11 @@
 //#define GEOMETRY_COMPILE_TESTS
 #include <fstream>
-#include <boost/program_options.hpp>
+#include <iterator>
 #include "index/rtree.hpp"
 #include "index/serial/serializer.hpp"
 #include "2015-data/fetch.hpp"
 #include "index/serial/serial_query.hpp"
+
 
 using point_type = geom::Point<float, 2>;
 using box_type = geom::Box<point_type>;
@@ -36,12 +37,7 @@ void read_index (const std::string& ar_name, const std::string& dat_name, const 
 
     std::cout << "Reloaded" << std::endl;
 
-    std::vector<std::string> res;
-    index.query(box, std::back_inserter(res));
-    for (const auto& i : res) {
-        std::cout << i << '\n';
-    }
-
+    index.query(box, std::ostream_iterator<std::string>(std::cout, "\n"));
     std::cout << "Finished read_index\n";
 }
 
@@ -49,12 +45,7 @@ void just_query (const std::string& ar_name, const std::string& dat_name, const 
     std::ifstream ar(ar_name, std::ios::binary);
     std::ifstream dat(dat_name, std::ios::binary);
 
-    std::vector<std::string> res;
-    index_query<index_type>(ar, dat, box, std::back_inserter(res));
-
-    for (const auto& i : res) {
-        std::cout << i << '\n';
-    }
+    index_query<index_type>(ar, dat, box, std::ostream_iterator<std::string>(std::cout, "\n"));
 }
 
 int main (int argc, char** argv) {
@@ -62,13 +53,8 @@ int main (int argc, char** argv) {
         std::cerr << "Usage: program <idx_name> <dat_name> [source-if-build]";
         return -1;
     }
-//    return 0;
-
-//    std::string archive_name = "../index_storage/tree.idx";
-//    std::string dat_name = "../index_storage/tree.dat";
     std::string archive_name = argv[1];
     std::string dat_name = argv[2];
-
 
     if (argc == 4) {
         std::string path = argv[3];
@@ -76,7 +62,7 @@ int main (int argc, char** argv) {
     }
 
     std::cout << "Ingrese p1.x, p1.y y p2.x, p2.y\n";
-//    { -73.9589, 40.7168 }, { -73.9588, 40.7169 }
+//  -73.9589 40.7168 -73.9588 40.7169
     point_type p1, p2;
 
     std::cin >> p1[0] >> p1[1];
